@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Etiquetas Ebenezer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="menu">
+  <ul>
+    <li><a href="index.html">Gerar Etiquetas</a></li>
+    <li><a href="agendamento.html">Agendar Coleta</a></li>
+    <li><a href="consulta.html">Consultar Coletas</a></li>
+    <li><a href="retirada.html">Confirmar Retirada</a></li>
+    <li><a href="TESTE.html">Conferência</a></li>
+  </ul>
+</nav>
+
+<div style="text-align: center;">
+  <img class="EbenezerTitulo" src="EbenezerTitulo.png" alt="EbenezerTitulo">
+</div>
+
+<div class="container">
+  <form class="formulario">
+    <div>
+      <label>Cliente: <input type="text" id="cliente"></label>
+    </div>
+    <div>
+      <label>NF / Orçamento: <input type="text" id="nf"></label>
+    </div>
+    <div>
+      <label>Tipo de documento:
+        <select id="tipoDocumento">
+          <option value="nf">Nota Fiscal</option>
+          <option value="orcamento">Orçamento</option>
+        </select>
+      </label>
+    </div>
+
+    <button type="button" onclick="adicionarCaixa()">Adicionar Caixa</button>
+    <button type="button" onclick="excluirUltimaCaixa()">Excluir Última Caixa</button>
+    <div id="quantidadesCaixas"></div>
+
+    <div>
+      <label>Data: <input type="date" id="data"></label>
+    </div>
+
+    <div>
+      <label>Tipo de entrega:
+        <select id="tipoEntrega" onchange="alternarEntrega()">
+          <option value="transportadora">Transportadora</option>
+          <option value="representante">Representante</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="entregaCampo">
+      <label>Transportadora: <input type="text" id="transportadora"></label>
+    </div>
+
+    <div>
+      <label>Total de produtos: <span id="totalProdutos">0</span></label>
+    </div>
+
+    <button type="button" onclick="gerarEtiquetas()">Gerar</button>
+    <button type="button" id="btnImprimir" style="display:none" onclick="window.print()">Imprimir</button>
+    <button type="button" onclick="limpar()">Limpar</button>
+    <button type="button" onclick="exportarParaExcel()">Exportar para Excel</button>
+  </form>
+
+  <div id="etiquetas"></div>
+</div>
+
+<script>
+  let contadorCaixas = 0;
+
+  window.onload = function() {
+    const hoje = new Date().toISOString().split("T")[0];
+    document.getElementById("data").value = hoje;
+  };
+
+  function adicionarCaixa() {
+    contadorCaixas++;
+    const container = document.getElementById("quantidadesCaixas");
+
+    const lbl = document.createElement("label");
+    lbl.id = `caixa_label_${contadorCaixas}`;
+    lbl.innerHTML = `Produtos na caixa ${contadorCaixas}: <input type="number" id="caixa_${contadorCaixas}" min="1">`;
+    container.appendChild(lbl);
+
+    const input = lbl.querySelector("input");
+    input.addEventListener("input", atualizarTotalProdutos);
+
+    atualizarTotalProdutos();
+  }
+
+  function excluirUltimaCaixa() {
+    if (contadorCaixas < 1) return;
+
+    const lbl = document.getElementById(`caixa_label_${contadorCaixas}`);
+    if (lbl) {
+      lbl.remove();
+      contadorCaixas--;
+      atualizarTotalProdutos();
+    }
+  }
+
+  function atualizarTotalProdutos() {
+    let total = 0;
+    for (let i = 1; i <= contadorCaixas; i++) {
+      const input = document.getElementById(`caixa_${i}`);
+      if (input) {
+        const val = parseInt(input.value) || 0;
+        total += val;
+      }
+    }
+    document.getElementById("totalProdutos").textContent = total;
+  }
+
+  function gerarEtiquetas() {
+    const cliente = document.getElementById("cliente").value.trim();
+    const nf = document.getElementById("nf").value.trim();
+    const tipoDoc = document.getElementById("tipoDocumento").value;
+    const data = document.getElementById("data").value;
+    const trans = document.getElementById("transportadora").value.trim();
+    const entregaTipo = document.getElementById("tipoEntrega").value;
+    const wrap = document.getElementById("etiquetas");
+    wrap.innerHTML = "";
+
+    let caixasValidas = 0;
+
+    for (let i = 1; i <= contadorCaixas; i++) {
+      const input = document.getElementById(`caixa_${i}`);
+      if (!input) continue;
+      const prod = parseInt(input.value) || 0;
+      if (prod < 1) {
+        alert(`Quantidade de produtos inválida na caixa ${i}.`);
+        return;
+      }
+      caixasValidas++;
+    }
+
+    if (caixasValidas < 1) {
+      alert("Adicione pelo menos uma caixa válida.");
+      return;
+    }
+
+    let numeroEtiqueta = 1;
+    for (let i = 1; i <= contadorCaixas; i++) {
+      const input = document.getElementById(`caixa_${i}`);
+      if (!input) continue;
+      const prod = parseInt(input.value) || 0;
+
+      const div = document.createElement("div");
+      div.className = "etiqueta";
+      div.innerHTML = `
+        <img src="EbenezerTitulo.png" class="logo-etiqueta" alt="">
+        <div class="conteudo">
+          <p><strong>Cliente:</strong> ${cliente}</p>
+          <p><strong>${tipoDoc === "nf" ? "NF" : "Orçamento"}:</strong> ${nf}</p>
+          <p><strong>Caixa:</strong> ${numeroEtiqueta} de ${caixasValidas}</p>
+          <p><strong>Produtos na caixa:</strong> ${prod}</p>
+          <p><strong>Data:</strong> ${data}</p>
+          <p><strong>${entregaTipo.charAt(0).toUpperCase() + entregaTipo.slice(1)}:</strong> ${trans}</p>
+        </div>
+      `;
+      wrap.appendChild(div);
+      numeroEtiqueta++;
+    }
+
+    document.getElementById("btnImprimir").style.display = "inline-block";
+  }
+
+  function limpar() {
+    document.querySelectorAll(".formulario input").forEach(i => i.value = "");
+    document.getElementById("tipoDocumento").selectedIndex = 0;
+    document.getElementById("tipoEntrega").selectedIndex = 0;
+    document.getElementById("quantidadesCaixas").innerHTML = "";
+    document.getElementById("etiquetas").innerHTML = "";
+    document.getElementById("btnImprimir").style.display = "none";
+    document.getElementById("totalProdutos").textContent = "0";
+    contadorCaixas = 0;
+
+    const hoje = new Date().toISOString().split("T")[0];
+    document.getElementById("data").value = hoje;
+    alternarEntrega();
+  }
+
+  function alternarEntrega() {
+    const tipo = document.getElementById("tipoEntrega").value;
+    const campo = document.getElementById("entregaCampo");
+    campo.innerHTML = `<label>${tipo.charAt(0).toUpperCase() + tipo.slice(1)}: <input type="text" id="transportadora"></label>`;
+  }
+
+  function exportarParaExcel() {
+    const cliente = document.getElementById("cliente").value.trim();
+    const nf = document.getElementById("nf").value.trim();
+    const tipoDoc = document.getElementById("tipoDocumento").value;
+    const data = document.getElementById("data").value;
+    const entrega = document.getElementById("transportadora").value.trim();
+    const entregaTipo = document.getElementById("tipoEntrega").value;
+
+    let csv = `Cliente;${cliente}\n${tipoDoc === "nf" ? "NF" : "Orçamento"};${nf}\nData;${data}\n${entregaTipo};${entrega}\n\nCaixa;Produtos\n`;
+
+    for (let i = 1; i <= contadorCaixas; i++) {
+      const input = document.getElementById(`caixa_${i}`);
+      if (!input) continue;
+      const prod = parseInt(input.value) || 0;
+      csv += `${i};${prod}\n`;
+    }
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${nf}.csv`;
+    link.click();
+  }
+</script>
+
+<footer class="rodape">
+  <p>Produzido por <strong>Startaweb</strong> | Sistema interno de etiquetas</p>
+  <p>Todos os direitos reservados © 2025  
+  Contato: robertoursinejesus@gmail.com | (11) 98285-6216</p>
+</footer>
+
+</body>
+</html>

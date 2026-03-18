@@ -1,0 +1,153 @@
+/* ───────────────────────────────
+   ESTILOS GERAIS
+─────────────────────────────── */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+}
+
+.EbenezerTitulo {
+  display: block;
+  margin: 0 auto 20px;
+  max-width: 300px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.formulario {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 40px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.formulario div {
+  margin-bottom: 15px;
+}
+
+.formulario label {
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.formulario input,
+.formulario select {
+	border-radius: 40px;
+  margin-left: 10px;
+  padding: 5px;
+  width: 250px;
+}
+
+button {
+  border-radius: 20px;
+  margin-right: 10px;
+  padding: 10px 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* ───────────────────────────────
+   ÁREA DAS ETIQUETAS NA TELA
+─────────────────────────────── */
+#etiquetas {
+  display: block;
+}
+
+.etiqueta {
+  width: 18cm;
+  height: 12cm;
+  border: 2px solid #333;
+  margin: 0 auto 20px;
+  padding: 15px;
+  background-color: #fff;
+  box-sizing: border-box;
+  text-align: left;
+  font-size: 24px;
+}
+
+.logo-etiqueta {
+  max-width: 150px;
+  margin-bottom: 15px;
+}
+
+.conteudo p {
+  margin: 8px 0;
+  line-height: 1.2;
+}
+
+/* ───────────────────────────────
+   REGRAS DE PÁGINA PARA IMPRESSÃO
+─────────────────────────────── */
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  /* esconde tudo */
+  body * {
+    visibility: hidden;
+  }
+
+  /* mantém visível apenas o contêiner de etiquetas */
+  #etiquetas, #etiquetas * {
+    visibility: visible;
+  }
+
+  #etiquetas {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .etiqueta {
+    all: unset;
+    display: block;
+    width: 18cm;
+    height: 9cm;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 24px;
+    text-align: left;
+    border: 2px solid #333;
+    page-break-inside: avoid;
+    margin: 0 auto 10mm;
+  }
+
+  .logo-etiqueta {
+    max-width: 150px;
+    margin-bottom: 15px;
+  }
+
+  .conteudo p {
+    margin: 8px 0;
+    line-height: 1.2;
+  }
+  @media print {
+  .rodape {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 10px;
+    color: #444;
+    text-align: center;
+  }
+.rodape {
+  text-align: center;
+  font-size: 4px;
+  color: #666;
+  margin-top: 40px;
+  padding: 20px 0;
+  border-top: 1px solid #ccc;
+}
+
+}

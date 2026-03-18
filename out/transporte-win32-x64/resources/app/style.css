@@ -1,0 +1,180 @@
+/* Estilo dos filtros */
+.filtros input,
+.filtros select {
+  padding: 8px;
+  margin: 0 10px 10px 0;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.filtros button {
+  padding: 8px 12px;
+  background-color: #0078d7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filtros button:hover {
+  background-color: #005fa3;
+}
+
+/* Cartão de coleta */
+.coleta-card {
+  background: #fff;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* Formulário */
+form {
+  max-width: 400px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #f7f7f7;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+form label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+  color: #333;
+}
+
+form input,
+form select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+form button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #0078d7;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+form button:hover {
+  background: #005fa3;
+}
+
+/* Menu de navegação */
+.menu {
+  background: #0078d7;
+  padding: 10px 0;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.menu li {
+  margin: 0 15px;
+}
+
+.menu a {
+  display: block;
+  padding: 12px 18px;
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.menu a:hover {
+  background: #005fa3;
+}
+/* ───────────────────────────────
+   REGRAS DE PÁGINA PARA IMPRESSÃO
+─────────────────────────────── */
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  /* esconde tudo */
+  body * {
+    visibility: hidden;
+  }
+
+  /* mantém visível apenas o contêiner de etiquetas */
+  #etiquetas, #etiquetas * {
+    visibility: visible;
+  }
+
+  #etiquetas {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .etiqueta {
+    all: unset;
+    display: block;
+    width: 18cm;
+    height: 9cm;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 24px;
+    text-align: left;
+    border: 2px solid #333;
+    page-break-inside: avoid;
+    margin: 0 auto 10mm;
+  }
+
+  .logo-etiqueta {
+    max-width: 150px;
+    margin-bottom: 15px;
+  }
+
+  .conteudo p {
+    margin: 8px 0;
+    line-height: 1.2;
+  }
+  @media print {
+  .rodape {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 10px;
+    color: #444;
+    text-align: center;
+  }
+.rodape {
+  text-align: center;
+  font-size: 4px;
+  color: #666;
+  margin-top: 40px;
+  padding: 20px 0;
+  border-top: 1px solid #ccc;
+}
+
+}

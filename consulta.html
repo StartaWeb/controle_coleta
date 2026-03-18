@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Consulta de Coletas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="menu">
+  <ul>
+    <li><a href="index.html">Gerar Etiquetas</a></li>
+    <li><a href="agendamento.html">Agendar Coleta</a></li>
+    <li><a href="consulta.html">Consultar Coletas</a></li>
+    <li><a href="retirada.html">Confirmar Retirada</a></li>
+
+  </ul>
+</nav>
+
+<h1 style="text-align: center;">Consulta de Coletas</h1>
+
+<div class="filtros">
+  <input type="text" id="filtroCliente" placeholder="Buscar por cliente...">
+  <input type="text" id="filtroNumero" placeholder="Buscar por número de coleta...">
+  <input type="text" id="filtroNF" placeholder="Buscar por nota fiscal...">
+  <select id="filtroStatus">
+    <option value="">Todos os status</option>
+    <option value="Agendada">Agendada</option>
+    <option value="Realizada">Realizada</option>
+  </select>
+  <button onclick="filtrarColetas()">Filtrar</button>
+  <button onclick="exportarParaCSV()">Exportar para CSV</button>
+</div>
+
+<style>
+  .btn-salvar {
+   background-color: #28a745;   /* verde estilo "salvar" */
+   color: #fff;                 /* texto branco */
+   border: none;                /* remove borda padrão */
+   border-radius: 5px;          /* cantos arredondados */
+   padding: 10px 20px;          /* espaçamento interno */
+   font-size: 16px;             /* tamanho da fonte */
+   font-weight: bold;           /* texto em negrito */
+   cursor: pointer;             /* cursor de mãozinha */
+   transition: background-color 0.3s ease; /* animação suave */
+ }
+
+ .btn-salvar:hover {
+   background-color: #218838;   /* tom mais escuro ao passar o mouse */
+ }
+
+ .btn-salvar:active {
+   background-color: #1e7e34;   /* tom ainda mais escuro ao clicar */
+ }
+</style>
+
+<style>
+.btn-editar {
+background-color: #007bff;   /* azul padrão */
+color: #fff;                 /* texto branco */
+border: none;                /* remove borda padrão */
+border-radius: 5px;          /* cantos arredondados */
+padding: 10px 20px;          /* espaçamento interno */
+font-size: 16px;             /* tamanho da fonte */
+font-weight: bold;           /* texto em negrito */
+cursor: pointer;             /* cursor de mãozinha */
+transition: background-color 0.3s ease; /* animação suave */
+}
+
+.btn-editar:hover {
+background-color: #0069d9;   /* tom mais escuro ao passar o mouse */
+}
+
+.btn-editar:active {
+background-color: #0056b3;   /* tom ainda mais escuro ao clicar */
+}
+</style>
+
+
+<div id="listaColetas"></div>
+
+<script src="consulta.js"></script>
+
+<footer class="rodape">
+  <p>Produzido por <strong>Startaweb</strong> | Sistema interno de etiquetas</p>
+  <p>Todos os direitos reservados © 2025<br>
+  Contato: robertoursinejesus@gmail.com | (11) 98285-6216</p>
+</footer>
+</body>
+</html>

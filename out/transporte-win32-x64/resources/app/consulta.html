@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Consulta de Coletas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="menu">
+    <ul>
+        <li><a href="index.html">Gerar Etiquetas</a></li>
+        <li><a href="agendamento.html">Agendar Coleta</a></li>
+        <li><a href="consulta.html">Consultar Coletas</a></li>
+        <li><a href="retirada.html">Confirmar Retirada</a></li>
+    </ul>
+</nav>
+
+<h1>Consulta de Coletas</h1>
+
+<div class="filtros">
+    <input type="text" id="filtroCliente" placeholder="Buscar por cliente...">
+    <input type="text" id="filtroNumero" placeholder="Buscar por número de coleta...">
+    <input type="text" id="filtroNF" placeholder="Buscar por nota fiscal...">
+    <select id="filtroStatus">
+        <option value="">Todos os status</option>
+        <option value="Agendada">Agendada</option>
+        <option value="Realizada">Realizada</option>
+    </select>
+    <button onclick="filtrarColetas()">Filtrar</button>
+    <button onclick="exportarParaExcel()">Exportar para Excel</button>
+</div>
+
+<div id="listaColetas"></div>
+
+<script src="consulta.js"></script>
+</body>
+</html>
