@@ -1,0 +1,860 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f7f9fa;
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(245, 0, 87, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 85% 15%, rgba(156, 39, 176, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 35% 80%, rgba(0, 188, 212, 0.14) 0%, transparent 50%),
+    radial-gradient(circle at 75% 85%, rgba(139, 195, 74, 0.12) 0%, transparent 50%);
+  background-attachment: fixed;
+  color: #333;
+  line-height: 1.6;
+  padding-bottom: 60px;
+  animation: pageEnter 0.38s ease both;
+}
+
+/* Apenas opacity — sem transform no body para não quebrar position:fixed (modal, menu, curtain) */
+@keyframes pageEnter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* page-exit mantido por compatibilidade mas não usado (cortina cuida da saída) */
+body.page-exit {
+  animation: pageExit 0.2s ease forwards;
+}
+
+@keyframes pageExit {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+
+/* ── Ocultar na impressão (não esconde na tela!) ────── */
+@media print {
+  .no-print { display: none !important; }
+}
+
+/* ── Blocos de caixa com dimensões ─────────── */
+.caixa-bloco {
+  background: rgba(241, 245, 249, 0.8);
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border-left: 4px solid #cbd5e1;
+}
+.caixa-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.caixa-row:last-child { margin-bottom: 0; }
+.caixa-row label {
+  font-size: 13px;
+  color: #6a1b9a;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.caixa-row input[type=number] {
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #2d3748;
+  background: rgba(255,255,255,0.9);
+  transition: all 0.25s ease;
+  margin-top: 0;
+  width: 90px;
+}
+.caixa-row input[type=number]:focus {
+  outline: none;
+  border-color: #9c27b0;
+  box-shadow: 0 0 0 3px rgba(156,39,176,0.12);
+}
+
+
+
+h1 {
+  text-align: center;
+  margin: 30px 0 20px;
+  color: #2e103b;
+  font-weight: 700;
+  font-size: 28px;
+  letter-spacing: -0.5px;
+}
+
+/* ── Nav Bar — Slim Edition ─────────────────────────────── */
+.menu {
+  background: linear-gradient(-45deg, #1a0a24, #2e103b, #6a1b9a, #9c27b0);
+  background-size: 400% 400%;
+  animation: aquarelaAnim 20s ease infinite;
+  padding: 0 24px;
+  box-shadow: 0 2px 18px rgba(0,0,0,0.28);
+  margin-bottom: 36px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 58px;
+  display: flex;
+  align-items: stretch;
+}
+
+@keyframes aquarelaAnim {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.menu ul {
+  list-style: none;
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  width: 100%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+.menu ul::-webkit-scrollbar { display: none; }
+
+/* Brand — injetado via auth.js, ::before suprimido */
+.menu ul::before { display: none; }
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  padding-right: 24px;
+  margin-right: 4px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,0.12);
+}
+.nav-brand span {
+  color: #fff;
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.6px;
+  line-height: 1;
+}
+.nav-brand span em {
+  font-style: normal;
+  color: rgba(255,255,255,0.5);
+  font-weight: 400;
+}
+
+.menu li { display: flex; align-items: stretch; }
+
+.menu a {
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  border-bottom: 2.5px solid transparent;
+  border-top: 2.5px solid transparent;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  background: none;
+  backdrop-filter: none;
+}
+
+.menu a:hover {
+  color: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.07);
+  transform: none;
+  box-shadow: none;
+  border-bottom-color: rgba(255,255,255,0.45);
+}
+
+.menu a.ativo {
+  color: #fff;
+  font-weight: 700;
+  border-bottom-color: rgba(255,255,255,0.9);
+  background: rgba(255,255,255,0.1);
+}
+
+.nav-badge-item {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255,255,255,0.12);
+  flex-shrink: 0;
+}
+
+/* ── Fade de transição entre páginas ────────────────────── */
+#page-curtain {
+  position: fixed;
+  inset: 0;
+  background: #f7f9fa;
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+#page-curtain.ativa {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Main Forms and Containers - Glassmorphism hint */
+.container, form {
+  max-width: 650px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 35px 40px;
+  border-radius: 20px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+  border: 1px solid rgba(255,255,255,0.7);
+}
+
+form label, .filtros label {
+  display: block;
+  margin-top: 18px;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+form input, form select, .filtros input, .filtros select {
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+  color: #2d3748;
+  transition: all 0.3s ease;
+  background-color: rgba(255,255,255,0.9);
+  font-family: inherit;
+}
+
+form input:focus, form select:focus, .filtros input:focus, .filtros select:focus {
+  outline: none;
+  border-color: #f50057;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(245, 0, 87, 0.15);
+}
+
+/* Action Buttons (Primary is Pink/Purple gradient) */
+button, form button {
+  margin-top: 25px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #f50057, #9c27b0);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(245, 0, 87, 0.25);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+button:hover, form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(156, 39, 176, 0.35);
+  background: linear-gradient(135deg, #e91e63, #7b1fa2);
+}
+
+button:active, form button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(245, 0, 87, 0.2);
+}
+
+/* Specific Action Buttons */
+.btn-salvar {
+  background: linear-gradient(135deg, #8bc34a, #4caf50);
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.25);
+}
+.btn-salvar:hover {
+  background: linear-gradient(135deg, #7cb342, #388e3c);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.35);
+}
+.btn-editar {
+  background: linear-gradient(135deg, #00bcd4, #009688);
+  box-shadow: 0 4px 10px rgba(0, 188, 212, 0.25);
+}
+.btn-editar:hover {
+  background: linear-gradient(135deg, #0097a7, #00796b);
+  box-shadow: 0 6px 16px rgba(0, 188, 212, 0.35);
+}
+
+/* Filtros Container on Consultas */
+.filtros {
+  max-width: 850px;
+  margin: 0 auto 30px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(15px);
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  border: 1px solid rgba(255,255,255,0.7);
+}
+.filtros input, .filtros select {
+  width: auto;
+  flex: 1 1 200px;
+  margin-top: 0;
+}
+.filtros button {
+  margin-top: 0;
+  flex: 0 1 auto;
+}
+
+/* Cards (Coletas) */
+.coleta-card {
+  max-width: 850px;
+  margin: 0 auto 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 25px 30px;
+  border-left: 6px solid #00bcd4;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.coleta-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+  border-left-color: #f50057;
+}
+.coleta-card p {
+  color: #4a5568;
+  font-size: 15px;
+  margin: 0;
+}
+.coleta-card strong {
+  color: #1a202c;
+  font-weight: 600;
+}
+
+/* Fix index.html Ebenezer Title Image */
+img.EbenezerTitulo {
+  display: block;
+  margin: 0 auto 30px;
+  max-width: 320px;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+  transition: transform 0.4s ease;
+}
+img.EbenezerTitulo:hover {
+  transform: scale(1.03);
+}
+
+/* Dynamic Add/Remove Containers */
+#quantidadesCaixas label {
+  background: rgba(241, 245, 249, 0.8);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  border-left: 4px solid #cbd5e1;
+}
+
+/* Alert/Notifications */
+#confirmacao, #resultadoRetirada {
+  max-width: 650px;
+  margin: 30px auto;
+  text-align: center;
+  font-weight: 600;
+  padding: 18px;
+  border-radius: 15px;
+  background: rgba(225, 190, 231, 0.3);
+  color: #6a1b9a;
+  border: 1px solid rgba(225, 190, 231, 0.6);
+  font-size: 15px;
+}
+
+/* Footer Section */
+.rodape {
+  text-align: center;
+  font-size: 13px;
+  color: #718096;
+  margin-top: 80px;
+  padding: 30px 20px;
+  background-color: transparent;
+  border-top: 1px solid rgba(0,0,0,0.05);
+}
+.rodape strong {
+  color: #2d3748;
+}
+
+/* ── IMPRESSÃO — regras centralizadas aqui (não duplicar abaixo) ── */
+
+/* ─────────────────────────────────────────────────────────
+   LOGIN PAGE
+───────────────────────────────────────────────────────── */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-card {
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.8);
+  padding: 48px 44px 44px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-logo {
+  max-width: 200px;
+  margin: 0 auto 24px;
+  display: block;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
+}
+
+.login-card h1 { margin: 0 0 6px; font-size: 22px; }
+
+.login-sub {
+  color: #718096;
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+/* Reset glassmorphism do form dentro do login-card */
+.login-card form {
+  padding: 0; background: none;
+  box-shadow: none; border: none; backdrop-filter: none; max-width: none;
+}
+.login-card form label { text-align: left; }
+.login-card form button { width: 100%; margin-top: 28px; }
+
+.login-erro-msg {
+  color: #f50057; font-weight: 600;
+  margin-top: 16px; font-size: 14px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   BADGE DE USUÁRIO NO MENU
+───────────────────────────────────────────────────────── */
+.usuario-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.usuario-nome {
+  color: rgba(255,255,255,0.95);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.btn-logout {
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0;
+  box-shadow: none;
+}
+.btn-logout:hover {
+  background: rgba(255,255,255,0.35);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* ─────────────────────────────────────────────────────────
+   BOTÕES DE AÇÃO NAS ETIQUETAS
+───────────────────────────────────────────────────────── */
+.btn-excluir {
+  background: linear-gradient(135deg, #ff5252, #f44336);
+  box-shadow: 0 4px 10px rgba(244,67,54,0.25);
+  color: #fff; border: none; border-radius: 10px;
+  padding: 10px 20px; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s ease; margin-top: 0;
+}
+.btn-excluir:hover {
+  background: linear-gradient(135deg, #e53935, #c62828);
+  box-shadow: 0 6px 16px rgba(244,67,54,0.35);
+  transform: translateY(-2px);
+}
+
+.btn-reimprimir {
+  background: linear-gradient(135deg, #ff9800, #f57c00);
+  box-shadow: 0 4px 10px rgba(255,152,0,0.25);
+  color: #fff; border: none; border-radius: 10px;
+  padding: 10px 20px; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s ease; margin-top: 0;
+}
+.btn-reimprimir:hover {
+  background: linear-gradient(135deg, #f57c00, #e65100);
+  box-shadow: 0 6px 16px rgba(255,152,0,0.35);
+  transform: translateY(-2px);
+}
+
+/* ─────────────────────────────────────────────────────────
+   MODAL DE EDIÇÃO DE ETIQUETA
+───────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-card {
+  background: rgba(255,255,255,0.97);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.8);
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-fechar {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: rgba(0,0,0,0.08);
+  border: none; border-radius: 50%;
+  width: 36px; height: 36px;
+  font-size: 18px; cursor: pointer;
+  transition: background 0.2s ease;
+  margin: 0; padding: 0;
+  box-shadow: none; color: #333;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-fechar:hover { background: rgba(0,0,0,0.15); transform: none; box-shadow: none; }
+
+.modal-card h2 { text-align: left; margin-bottom: 8px; font-size: 20px; color: #2e103b; }
+
+/* Reset glassmorphism do form dentro do modal */
+.modal-card form {
+  padding: 0; background: none;
+  box-shadow: none; border: none; backdrop-filter: none; max-width: none;
+}
+.modal-card form button[type="submit"] { width: 100%; margin-top: 24px; }
+
+.caixa-modal-item {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.caixa-modal-item input { flex: 1; margin-top: 0 !important; }
+
+.btn-remover-caixa {
+  background: linear-gradient(135deg, #ff5252, #f44336);
+  border: none; border-radius: 8px;
+  color: #fff; padding: 8px 12px;
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  margin-top: 0; box-shadow: 0 2px 6px rgba(244,67,54,0.2);
+  transition: all 0.2s ease; flex-shrink: 0;
+}
+.btn-remover-caixa:hover { transform: none; box-shadow: 0 4px 10px rgba(244,67,54,0.3); }
+
+.btn-add-caixa {
+  background: linear-gradient(135deg, #4caf50, #388e3c);
+  border: none; border-radius: 8px;
+  color: #fff; padding: 10px 18px;
+  cursor: pointer; font-size: 14px; font-weight: 600;
+  margin-top: 12px; box-shadow: 0 2px 8px rgba(76,175,80,0.2);
+  transition: all 0.3s ease;
+}
+.btn-add-caixa:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(76,175,80,0.3); }
+
+.caixas-titulo { font-weight: 600; margin-top: 18px; color: #4a5568; font-size: 14px; }
+
+/* ─────────────────────────────────────────────────────────
+   ÁREA DE REIMPRESSÃO (reimprimir etiquetas da consulta)
+───────────────────────────────────────────────────────── */
+#area-impressao { display: none; }
+
+body.modo-impressao > *:not(#area-impressao) { display: none !important; }
+body.modo-impressao #area-impressao { display: block !important; }
+
+/* ─────────────────────────────────────────────────────────
+   FECHAMENTOS - CONSULTA PREMIUM
+   ───────────────────────────────────────────────────────── */
+.card-fechamento-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.fechamento-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fechamento-thumbnail-wrapper {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 260px;
+}
+
+.fechamento-thumbnail-item {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.1);
+  cursor: zoom-in;
+  transition: all 0.2s ease;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fechamento-thumbnail-item:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-color: #9c27b0;
+}
+
+.fechamento-thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fechamento-no-image {
+  font-size: 24px;
+  color: #cbd5e1;
+}
+
+/* Modal Integrado de Imagem */
+.modal-img-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px);
+  z-index: 3000;
+  display: none; /* JS controla */
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-img-container {
+  max-width: 90%;
+  max-height: 90%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-img-content {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.modal-img-close {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 32px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.modal-img-close:hover {
+  transform: scale(1.2);
+}
+
+.modal-img-caption {
+  color: #fff;
+  margin-top: 20px;
+  font-weight: 500;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* ══════════════════════════════════════════════════════════
+   IMPRESSÃO — 3 ETIQUETAS POR FOLHA A4
+   Estratégia: @page margin:0 → 297mm = folha inteira exata
+   ══════════════════════════════════════════════════════════ */
+
+@page {
+  size: A4 portrait;
+  margin: 0;              /* sem margem: 297mm = página inteira */
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-sizing: border-box !important;
+  }
+
+  html, body {
+    background: #fff !important;
+    animation: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 210mm;
+    min-height: 297mm;
+  }
+
+  /* ── Oculta toda a interface (nav, form, botões etc.) ── */
+  .menu, nav, header, footer, .rodape,
+  h1, .container, .formulario, form,
+  .no-print, #page-curtain, #conexao-badge,
+  #btnImprimir, #btnImportarNF,
+  .EbenezerTitulo, .abas, .filtros-et,
+  .coleta-card, button,
+  #listaColetas, #listaEtiquetas,
+  #listaFechamentosAprovados {
+    display: none !important;
+  }
+
+  /* ── Raiz da área de etiquetas ── */
+  #etiquetas,
+  #area-impressao {
+    display: block !important;
+    width: 210mm;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ════════════════════════════════════════════════════════
+     GRUPO DE 3 ETIQUETAS = 1 PÁGINA INTEIRA (297mm)
+     padding interno = margens visuais
+     gap  = espaço entre as etiquetas
+     ════════════════════════════════════════════════════════ */
+  .pagina-impressao {
+    display: flex;
+    flex-direction: column;
+    width: 210mm;
+    height: 297mm;
+    padding: 0;
+    margin: 0;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .etiqueta {
+    width: 100%;
+    height: 33.33%; /* Exatamente 1/3 da altura da folha */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10mm 15mm;
+    border-bottom: 1px dashed #ccc; /* Linha de corte */
+    box-sizing: border-box;
+    background: #fff !important;
+  }
+  .pagina-impressao .etiqueta:last-child {
+    border-bottom: none;
+  }
+
+  /* ── Logo ── */
+  .logo-etiqueta {
+    display: block !important;
+    height: auto !important;
+    width: auto !important;
+    max-height: 18mm !important;
+    max-width: 55mm !important;
+    margin-bottom: 3mm !important;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  /* ── Div de conteúdo ── */
+  .conteudo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Parágrafos de texto ── */
+  .etiqueta p,
+  .conteudo p {
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 16pt !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #000 !important;
+    font-weight: 500 !important;
+  }
+  .etiqueta p strong,
+  .conteudo p strong {
+    font-weight: 700 !important;
+  }
+
+  /* ── Reimpressão (consulta.html modo-impressao) ── */
+  body.modo-impressao #area-impressao {
+    display: block !important;
+  }
+}
+
+

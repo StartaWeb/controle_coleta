@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emissão de Etiquetas - Ebenezer</title>
+  <link rel="stylesheet" href="style.css?v=2.0">
+</head>
+
+<body>
+  <nav class="menu">
+    <ul>
+      <!-- Preenchido pelo auth.js -->
+    </ul>
+  </nav>
+
+  <div style="text-align: center;">
+    <img class="EbenezerTitulo" src="EbenezerTitulo.png" alt="EbenezerTitulo">
+  </div>
+
+  <div class="container">
+    <form class="formulario">
+      <div>
+        <label>Cliente: <input type="text" id="cliente"></label>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: flex-end;">
+        <label id="lblNf" style="flex: 1;">NF / Orçamento: <input type="text" id="nf" onblur="this.value = normalizarNF(this.value)"></label>
+        <button type="button" id="btnImportarNF" onclick="importarDadosAprovados()" style="margin-top: 0; padding: 10px 15px; font-size: 13px; background: linear-gradient(135deg, #00bcd4, #009688); display: none;">Importar NF</button>
+      </div>
+      <div>
+        <label>Tipo de documento:
+          <select id="tipoDocumento" onchange="atualizarRotuloNf()">
+            <option value="nf">Nota Fiscal</option>
+            <option value="orcamento">Orçamento</option>
+          </select>
+        </label>
+      </div>
+
+      <button type="button" onclick="adicionarCaixa()">Adicionar Caixa</button>
+      <button type="button" onclick="excluirUltimaCaixa()">Excluir Última Caixa</button>
+      <div id="quantidadesCaixas"></div>
+
+      <div class="no-print">
+        <label>KG (peso total): <input type="number" id="kg" min="0" step="0.1" placeholder="0.0"></label>
+      </div>
+
+      <div>
+        <label>Data: <input type="date" id="data"></label>
+      </div>
+
+      <div>
+        <label>Tipo de entrega:
+          <select id="tipoEntrega" onchange="alternarEntrega()">
+            <option value="transportadora">Transportadora</option>
+            <option value="representante">Representante</option>
+          </select>
+        </label>
+      </div>
+
+      <div id="entregaCampo">
+        <label>Transportadora: <input type="text" id="transportadora"></label>
+      </div>
+
+      <div>
+        <label>Total de produtos: <span id="totalProdutos">0</span></label>
+      </div>
+      <div class="no-print">
+        <label>Total de caixas: <span id="totalCaixas">0</span></label>
+      </div>
+
+      <button type="button" onclick="gerarEtiquetas()">Gerar</button>
+      <button type="button" id="btnImprimir" style="display:none" onclick="window.print()">Imprimir</button>
+      <button type="button" onclick="limpar()">Limpar</button>
+      <button type="button" onclick="exportarParaExcel()">Exportar para Excel</button>
+    </form>
+  </div>
+
+  <div id="etiquetas"></div>
+
+  <!-- Firebase SDKs (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=2.0"></script>
+  <script src="auth.js?v=2.0"></script>
+
+  <script>
+    let contadorCaixas = 0;
+
+    window.onload = function () {
+      const hoje = new Date().toISOString().split("T")[0];
+      document.getElementById("data").value = hoje;
+      
+      // Verifica se há NF para importar via URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const nfParaImportar = urlParams.get('import_nf');
+      if (nfParaImportar) {
+        // Aguarda authPronto para garantir que Firebase está inicializado
+        window.addEventListener('authPronto', async () => {
+          document.getElementById('tipoDocumento').value = 'nf';
+          atualizarRotuloNf();
+          const nfInput = document.getElementById('nf');
+          if (nfInput) {
+            nfInput.value = nfParaImportar;
+            // Destaque visual para indicar que o campo foi preenchido automaticamente
+            nfInput.style.boxShadow = '0 0 0 3px rgba(76,175,80,0.4)';
+            setTimeout(() => nfInput.style.boxShadow = '', 3000);
+          }
+          await importarDadosAprovados();
+        }, { once: true });
+      }
+    };
+
+    function adicionarCaixa() {
+      contadorCaixas++;
+      const container = document.getElementById("quantidadesCaixas");
+
+      const lbl = document.createElement("div");
+      lbl.id = `caixa_label_${contadorCaixas}`;
+      lbl.className = "caixa-bloco";
+      lbl.innerHTML = `
+        <div class="caixa-row">
+          <label style="flex:1;">Produtos na caixa ${contadorCaixas}: <input type="number" id="caixa_${contadorCaixas}" min="1"></label>
+        </div>
+        <div class="caixa-row no-print">
+          <label>A(cm): <input type="number" id="caixa_a_${contadorCaixas}" min="0" step="0.1"></label>
+          <label>L(cm): <input type="number" id="caixa_l_${contadorCaixas}" min="0" step="0.1"></label>
+          <label>C(cm): <input type="number" id="caixa_c_${contadorCaixas}" min="0" step="0.1"></label>
+        </div>
+      `;
+      container.appendChild(lbl);
+
+      const inputQtd = lbl.querySelector(`#caixa_${contadorCaixas}`);
+      inputQtd.addEventListener("input", atualizarTotalProdutos);
+
+      atualizarTotalProdutos();
+    }
+
+    function excluirUltimaCaixa() {
+      if (contadorCaixas < 1) return;
+
+      const bloco = document.getElementById(`caixa_label_${contadorCaixas}`);
+      if (bloco) {
+        bloco.remove();
+        contadorCaixas--;
+        atualizarTotalProdutos();
+      }
+    }
+
+    function atualizarTotalProdutos() {
+      let total = 0;
+      for (let i = 1; i <= contadorCaixas; i++) {
+        const input = document.getElementById(`caixa_${i}`);
+        if (input) {
+          const val = parseInt(input.value) || 0;
+          total += val;
+        }
+      }
+      document.getElementById("totalProdutos").textContent = total;
+      document.getElementById("totalCaixas").textContent = contadorCaixas;
+    }
+
+    async function gerarEtiquetas() {
+      const cliente     = document.getElementById("cliente").value.trim();
+      const nf          = document.getElementById("nf").value.trim().replace(/[.,\s]/g, '');
+      const tipoDoc     = document.getElementById("tipoDocumento").value;
+      const data        = document.getElementById("data").value;
+      const trans       = document.getElementById("transportadora").value.trim();
+      const entregaTipo = document.getElementById("tipoEntrega").value;
+      const wrap        = document.getElementById("etiquetas");
+      wrap.innerHTML    = "";
+
+      if (nf) {
+        const existe = await checarNFExistente(nf);
+        if (existe) {
+          mostrarToast(`O número de ${tipoDoc === "nf" ? "NF" : "Orçamento"} ${nf} já está cadastrado no sistema.`, 'aviso', 6000);
+          return;
+        }
+      }
+
+      const kg          = parseFloat(document.getElementById("kg").value) || 0;
+
+      let caixasValidas = 0;
+      const quantidadesCaixas = [];
+      const dimensoesCaixas = [];
+
+      for (let i = 1; i <= contadorCaixas; i++) {
+        const input = document.getElementById(`caixa_${i}`);
+        if (!input) continue;
+        const prod = parseInt(input.value) || 0;
+        if (prod < 1) {
+          mostrarToast(`Quantidade de produtos inválida na caixa ${i}.`, 'aviso');
+          return;
+        }
+        caixasValidas++;
+        quantidadesCaixas.push(prod);
+        dimensoesCaixas.push({
+          c: parseFloat(document.getElementById(`caixa_c_${i}`)?.value) || 0,
+          l: parseFloat(document.getElementById(`caixa_l_${i}`)?.value) || 0,
+          a: parseFloat(document.getElementById(`caixa_a_${i}`)?.value) || 0
+        });
+      }
+
+      if (caixasValidas < 1) {
+        mostrarToast('Adicione pelo menos uma caixa válida.', 'aviso');
+        return;
+      }
+
+      let numeroEtiqueta = 1;
+      let paginaAtual = null;
+      let etiquetasNaPagina = 0;
+
+      for (let i = 1; i <= contadorCaixas; i++) {
+        const input = document.getElementById(`caixa_${i}`);
+        if (!input) continue;
+        const prod = parseInt(input.value) || 0;
+
+        if (etiquetasNaPagina === 0) {
+          paginaAtual = document.createElement('div');
+          paginaAtual.className = 'pagina-impressao';
+          wrap.appendChild(paginaAtual);
+        }
+
+        const div = document.createElement("div");
+        div.className = "etiqueta";
+        div.innerHTML = `
+          <img src="EbenezerTitulo.png" class="logo-etiqueta" alt="">
+          <div class="conteudo">
+            <p><strong>Cliente:</strong> ${cliente}</p>
+            ${nf ? `<p><strong>${tipoDoc === 'nf' ? 'NF' : 'Orcamento'}:</strong> ${nf}</p>` : ''}
+            <p><strong>Caixa:</strong> ${numeroEtiqueta} de ${caixasValidas}</p>
+            <p><strong>Produtos na caixa:</strong> ${prod}</p>
+            <p><strong>Data:</strong> ${data}</p>
+            <p><strong>${entregaTipo === 'transportadora' ? 'Transportadora' : 'Representante'}:</strong> ${window._modeloEnvioAtivo || trans}</p>
+            <p class="no-print" style="color:#7b1fa2;font-size:12px;"><strong>KG:</strong> ${kg} kg</p>
+          </div>
+        `;
+        paginaAtual.appendChild(div);
+        etiquetasNaPagina++;
+        numeroEtiqueta++;
+        if (etiquetasNaPagina === 3) etiquetasNaPagina = 0;
+      }
+
+      document.getElementById("btnImprimir").style.display = "inline-block";
+
+      // ─── Salvar registro no Firestore ───
+      try {
+        const totalProdutos = quantidadesCaixas.reduce((a, b) => a + b, 0);
+        const geradaEm = new Date().toLocaleString('pt-BR', {
+          day: '2-digit', month: '2-digit', year: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+
+        const id = await salvarEtiqueta({
+          cliente,
+          nf,
+          tipoDoc,
+          data,
+          entregaTipo,
+          transportadora: trans,
+          caixas: quantidadesCaixas,
+          dimensoes: dimensoesCaixas,
+          totalProdutos,
+          totalCaixas: caixasValidas,
+          kg,
+          geradaEm
+        });
+        if (window._perfilUsuario === 'expedicao') {
+          await registrarLog(window._nomeUsuario, 'Gerou etiqueta', id, { nf });
+        }
+      } catch (err) {
+        console.warn('Aviso: etiqueta gerada mas não salva no banco:', err.message);
+      }
+    }
+
+    function limpar() {
+      document.querySelectorAll(".formulario input").forEach(i => i.value = "");
+      document.getElementById("tipoDocumento").selectedIndex = 0;
+      document.getElementById("tipoEntrega").selectedIndex = 0;
+      document.getElementById("quantidadesCaixas").innerHTML = "";
+      document.getElementById("etiquetas").innerHTML = "";
+      document.getElementById("btnImprimir").style.display = "none";
+      document.getElementById("totalProdutos").textContent = "0";
+      document.getElementById("totalCaixas").textContent = "0";
+      document.getElementById("kg").value = "";
+      contadorCaixas = 0;
+
+      const hoje = new Date().toISOString().split("T")[0];
+      document.getElementById("data").value = hoje;
+      alternarEntrega();
+    }
+
+    function alternarEntrega() {
+      const tipo = document.getElementById("tipoEntrega").value;
+      const campo = document.getElementById("entregaCampo");
+      const labelText = tipo === 'transportadora' ? 'Transportadora' : 'Representante';
+      campo.innerHTML = `<label>${labelText}: <input type="text" id="transportadora"></label>`;
+    }
+
+    function atualizarRotuloNf() {
+      const tipoDoc = document.getElementById("tipoDocumento").value;
+      const lbl = document.getElementById("lblNf");
+      const btnImportar = document.getElementById("btnImportarNF");
+      
+      if (tipoDoc === 'orcamento') {
+        lbl.innerHTML = `Orçamento: <input type="text" id="nf" onblur="this.value = normalizarNF(this.value)">`;
+        btnImportar.style.display = 'none';
+      } else {
+        lbl.innerHTML = `Nota Fiscal (NF): <input type="text" id="nf" onblur="this.value = normalizarNF(this.value)">`;
+        if (btnImportar) btnImportar.style.display = 'inline-flex';
+      }
+    }
+
+    async function importarDadosAprovados() {
+      const nf = normalizarNF(document.getElementById("nf").value);
+      if (!nf) {
+        mostrarToast('Digite o número da NF para importar.', 'aviso');
+        return;
+      }
+
+      const btn = document.getElementById("btnImportarNF");
+      const originalText = btn.innerHTML;
+      btn.innerHTML = "Aguarde...";
+      btn.disabled = true;
+
+      try {
+        const f = await buscarFechamentoPorNFFinal(nf);
+        if (!f) {
+          mostrarToast(`NF "${nf}" não encontrada. Verifique se o fechamento foi aprovado e se o número está correto.`, 'erro', 6000);
+          return;
+        }
+
+        document.getElementById("cliente").value = f.cliente || "";
+        document.getElementById("data").value = new Date().toISOString().split("T")[0];
+        
+        // Define tipo de entrega
+        const selectEntrega = document.getElementById("tipoEntrega");
+        if (f.envio === 'transportadora') {
+          selectEntrega.value = 'transportadora';
+        } else if (f.representante && f.representante !== 'transportadora') {
+          selectEntrega.value = 'representante';
+        }
+        alternarEntrega();
+        
+        // Define transportadora/representante
+        const inputTransp = document.getElementById("transportadora");
+        if (inputTransp) {
+          inputTransp.value = f.nomeTransportadora || f.representante || "";
+        }
+        
+        // Armazena modelo de envio amigável para a etiqueta
+        const envioMap = { correios: 'Correios', sedex: 'SEDEX', transportadora: 'Transportadora' };
+        window._modeloEnvioAtivo = envioMap[f.envio] || f.envio || '';
+
+        // Limpa caixas atuais e adiciona as do fechamento
+        document.getElementById("quantidadesCaixas").innerHTML = "";
+        contadorCaixas = 0;
+
+        if (f.dimensoes && f.dimensoes.length > 0) {
+          // Com dimensões: preenche quantidades + dimensões de cada caixa
+          f.dimensoes.forEach((d, i) => {
+            adicionarCaixa();
+            const inputQtd = document.getElementById(`caixa_${contadorCaixas}`);
+            if (inputQtd) inputQtd.value = (f.caixas && f.caixas[i] !== undefined) ? f.caixas[i] : 1;
+            const a = document.getElementById(`caixa_a_${contadorCaixas}`);
+            const l = document.getElementById(`caixa_l_${contadorCaixas}`);
+            const c = document.getElementById(`caixa_c_${contadorCaixas}`);
+            if (a) a.value = d.a || 0;
+            if (l) l.value = d.l || 0;
+            if (c) c.value = d.c || 0;
+          });
+        } else if (f.caixas && f.caixas.length > 0) {
+          // Sem dimensões, mas tem array de quantidades por caixa
+          f.caixas.forEach(qtd => {
+            adicionarCaixa();
+            const inputQtd = document.getElementById(`caixa_${contadorCaixas}`);
+            if (inputQtd) inputQtd.value = qtd || 1;
+          });
+        } else if (f.totalCaixas && parseInt(f.totalCaixas) > 0) {
+          // Fallback: só sabe o total de caixas, adiciona com 1 item cada
+          const total = parseInt(f.totalCaixas);
+          for (let i = 0; i < total; i++) {
+            adicionarCaixa();
+            const inputQtd = document.getElementById(`caixa_${contadorCaixas}`);
+            if (inputQtd) inputQtd.value = 1;
+          }
+        }
+        
+        document.getElementById("kg").value = f.kg || "";
+        atualizarTotalProdutos();
+
+        // Scroll suave ao formulário após import auto (via URL)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('import_nf')) {
+          setTimeout(() => {
+            document.getElementById('etiquetaForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 300);
+        }
+
+        mostrarToast('Dados da NF importados com sucesso! Revise e gere a etiqueta.', 'sucesso', 5000);
+
+      } catch (err) {
+        mostrarToast('Erro ao importar dados: ' + err.message, 'erro', 6000);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    function exportarParaExcel() {
+      const cliente     = document.getElementById("cliente").value.trim();
+      const nf          = document.getElementById("nf").value.trim();
+      const tipoDoc     = document.getElementById("tipoDocumento").value;
+      const data        = document.getElementById("data").value;
+      const entrega     = document.getElementById("transportadora").value.trim();
+      const entregaTipo = document.getElementById("tipoEntrega").value;
+
+      let csv = `Cliente;${cliente}\n${tipoDoc === "nf" ? "NF" : "Orçamento"};${nf}\nData;${data}\n${entregaTipo};${entrega}\n\nCaixa;Produtos\n`;
+
+      for (let i = 1; i <= contadorCaixas; i++) {
+        const input = document.getElementById(`caixa_${i}`);
+        if (!input) continue;
+        const prod = parseInt(input.value) || 0;
+        csv += `${i};${prod}\n`;
+      }
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${nf}.csv`;
+      link.click();
+    }
+  </script>
+
+  <footer class="rodape">
+    <p>Produzido por <strong>Startaweb</strong> | Sistema interno de etiquetas</p>
+    <p>Todos os direitos reservados © 2025
+      Contato: robertoursinejesus@gmail.com | (11) 98285-6216</p>
+  </footer>
+
+</body>
+
+</html>

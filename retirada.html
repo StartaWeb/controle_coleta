@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Retirada - Ebenezer</title>
+    <link rel="stylesheet" href="style.css?v=2.0">
+</head>
+<body>
+    <nav class="menu">
+        <ul>
+            <!-- Preenchido pelo auth.js -->
+        </ul>
+    </nav>
+    <h1 style="text-align: center;">Confirmação de Retirada</h1>
+
+    <form id="retiradaForm">
+        <label for="notaFiscal">Número da Nota Fiscal:</label>
+        <input type="text" id="notaFiscal" required
+               onblur="this.value = normalizarNF(this.value)"
+               placeholder="Digite a NF...">
+
+        <label for="retirante">Nome do Retirante:</label>
+        <input type="text" id="retirante" required>
+
+        <button type="submit">Confirmar Retirada</button>
+    </form>
+
+    <div id="resultadoRetirada"></div>
+
+    <!-- Firebase SDKs (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js?v=2.0"></script>
+    <script src="auth.js?v=2.0"></script>
+    <script src="retirada.js?v=2.0"></script>
+</body>
+</html>

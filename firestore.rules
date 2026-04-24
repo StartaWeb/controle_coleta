@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function estaAutenticado() {
+      return request.auth != null;
+    }
+
+    function getPerfil() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.perfil;
+    }
+
+    function ehAdmin() {
+      return estaAutenticado() && getPerfil() == 'admin';
+    }
+
+    function ehFaturamento() {
+      return estaAutenticado() && getPerfil() == 'faturamento';
+    }
+
+    function ehExpedicao() {
+      return estaAutenticado() && getPerfil() == 'expedicao';
+    }
+
+    // ── Usuários ─────────────────────────────────────────────────
+    // Apenas admin gerencia usuários
+    match /usuarios/{userId} {
+      allow read:   if estaAutenticado();
+      allow write:  if ehAdmin();
+    }
+
+    // ── Etiquetas ────────────────────────────────────────────────
+    // Leitura: todos autenticados
+    // Criação: expedicao e admin
+    // Edição:  expedicao e admin
+    // Exclusão: apenas admin
+    match /etiquetas/{etiquetaId} {
+      allow read:   if estaAutenticado();
+      allow create: if estaAutenticado();
+      allow update: if estaAutenticado();
+      allow delete: if ehAdmin();
+    }
+
+    // ── Fechamentos ──────────────────────────────────────────────
+    // Leitura: todos autenticados
+    // Criação: qualquer autenticado (expedicao, whatsapp, admin)
+    // Aprovação/Rejeição: apenas faturamento e admin
+    // Exclusão: apenas admin
+    match /fechamentos/{fechamentoId} {
+      allow read:   if estaAutenticado();
+      allow create: if estaAutenticado();
+      allow update: if estaAutenticado();
+      allow delete: if ehAdmin();
+    }
+
+    // ── Coletas ──────────────────────────────────────────────────
+    // Leitura: todos autenticados
+    // Criação/edição: todos autenticados
+    // Exclusão: apenas admin
+    match /coletas/{coletaId} {
+      allow read:   if estaAutenticado();
+      allow create: if estaAutenticado();
+      allow update: if estaAutenticado();
+      allow delete: if ehAdmin();
+    }
+
+    // ── Logs ─────────────────────────────────────────────────────
+    // Apenas leitura para admin; escrita para todos autenticados
+    match /logs/{logId} {
+      allow read:  if ehAdmin();
+      allow write: if estaAutenticado();
+    }
+
+    // ── Contadores internos ──────────────────────────────────────
+    match /_contadores/{doc} {
+      allow read, write: if estaAutenticado();
+    }
+
+    // ── Fallback: bloqueia tudo mais ─────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

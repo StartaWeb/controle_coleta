@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agendamento de Coleta - Ebenezer</title>
+  <link rel="stylesheet" href="style.css?v=2.0">
+</head>
+<body>
+<nav class="menu">
+    <ul>
+        <!-- Preenchido pelo auth.js -->
+    </ul>
+</nav>
+
+<style>
+    .input-com-botao {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    .input-com-botao input {
+        flex: 1;
+        margin-top: 0 !important;
+    }
+    .btn-importar {
+        background: linear-gradient(135deg, #00bcd4, #009688);
+        color: white;
+        border: none;
+        padding: 11px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        box-shadow: 0 4px 10px rgba(0, 188, 212, 0.25);
+        transition: all 0.3s ease;
+    }
+    .btn-importar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 188, 212, 0.35);
+    }
+</style>
+
+<h1 style="text-align: center;">Agendamento de Coleta</h1>
+
+<form id="coletaForm">
+    <label for="cliente">Nome do Cliente:</label>
+    <input type="text" id="cliente" name="cliente" required>
+
+    <label for="solicitante">Solicitante:</label>
+    <input type="text" id="solicitante" name="solicitante" required>
+
+    <label for="atendente">Atendente:</label>
+    <input type="text" id="atendente" name="atendente" required>
+
+    <label for="protocolo">Número de Protocolo:</label>
+    <input type="text" id="protocolo" name="protocolo" required>
+
+    <label for="notaFiscal">Nota Fiscal (NF):</label>
+    <div class="input-com-botao">
+        <input type="text" id="notaFiscal" name="notaFiscal"
+               placeholder="Digite o número da NF para importar..."
+               onblur="this.value = normalizarNF(this.value)">
+        <button type="button" class="btn-importar" onclick="importarDadosNF()">📥 Importar</button>
+    </div>
+
+    <label for="ordemServico">Ordem de Serviço:</label>
+    <input type="text" id="ordemServico" name="ordemServico" placeholder="Deixe em branco para gerar automaticamente">
+
+    <label for="observacao">Observação:</label>
+    <input type="text" id="observacao" name="observacao">
+
+    <label for="prazo">Prazo de Coleta:</label>
+    <input type="date" id="prazo" name="prazo" required>
+
+    <button type="submit">Agendar Coleta</button>
+</form>
+
+<div id="confirmacao"></div>
+
+<!-- Firebase SDKs (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js?v=2.0"></script>
+<script src="auth.js?v=2.0"></script>
+<script src="agendamento.js?v=2.0"></script>
+
+<footer class="rodape">
+    <p>Produzido por <strong>Startaweb</strong> | Sistema interno de etiquetas</p>
+    <p>Todos os direitos reservados © 2025<br>
+    Contato: robertoursinejesus@gmail.com | (11) 98285-6216</p>
+</footer>
+</body>
+</html>

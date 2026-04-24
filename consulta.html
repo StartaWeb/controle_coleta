@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consultas & Relatórios - Ebenezer</title>
+  <link rel="stylesheet" href="style.css?v=2.0">
+  <style>
+    /* ── Abas de navegação ── */
+    .abas {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      max-width: 850px;
+      margin: 0 auto 28px;
+    }
+    .aba-btn {
+      padding: 12px 32px;
+      border-radius: 30px;
+      border: 2px solid rgba(156,39,176,0.25);
+      background: rgba(255,255,255,0.7);
+      color: #6a1b9a;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      margin-top: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .aba-btn:hover {
+      background: rgba(156,39,176,0.12);
+      transform: translateY(-2px);
+    }
+    .aba-btn.aba-ativa {
+      background: linear-gradient(135deg, #f50057, #9c27b0);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px rgba(156,39,176,0.35);
+    }
+
+    /* ── Botões de ação da consulta ── */
+    .btn-salvar {
+      background: linear-gradient(135deg, #8bc34a, #4caf50);
+      box-shadow: 0 4px 10px rgba(76, 175, 80, 0.25);
+      color: #fff; border: none; border-radius: 10px;
+      padding: 10px 20px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s ease; margin-top: 0;
+    }
+    .btn-salvar:hover { background: linear-gradient(135deg, #7cb342, #388e3c); }
+
+    .btn-editar {
+      background: linear-gradient(135deg, #00bcd4, #009688);
+      box-shadow: 0 4px 10px rgba(0, 188, 212, 0.25);
+      color: #fff; border: none; border-radius: 10px;
+      padding: 10px 20px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s ease; margin-top: 0;
+    }
+    .btn-editar:hover { background: linear-gradient(135deg, #0097a7, #00796b); }
+
+    /* ── Filtros de etiqueta ── */
+    .filtros-et {
+      max-width: 850px;
+      margin: 0 auto 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.70);
+      backdrop-filter: blur(15px);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+      border: 1px solid rgba(255,255,255,0.7);
+    }
+    .filtros-et input {
+      flex: 1 1 200px;
+      padding: 11px 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      background: rgba(255,255,255,0.9);
+      transition: all 0.3s ease;
+    }
+    .filtros-et input:focus {
+      outline: none;
+      border-color: #9c27b0;
+      box-shadow: 0 0 0 4px rgba(156,39,176,0.12);
+    }
+    .filtros-et button { margin-top: 0; flex: 0 1 auto; }
+  </style>
+</head>
+<body>
+  <nav class="menu">
+    <ul>
+      <!-- Preenchido pelo auth.js -->
+    </ul>
+  </nav>
+
+  <div style="text-align: center;">
+    <img class="EbenezerTitulo" src="EbenezerTitulo.png" alt="EbenezerTitulo" style="max-width: 260px; margin: 20px auto;">
+  </div>
+
+  <h1 style="margin-top: 10px;">Consultas &amp; Relatórios</h1>
+
+<!-- Abas -->
+<div class="abas">
+  <button id="aba-coletas" class="aba-btn aba-ativa" onclick="trocarAba('coletas')">Coletas Agendadas</button>
+  <button id="aba-etiquetas" class="aba-btn" onclick="trocarAba('etiquetas')">Histórico de Etiquetas</button>
+  <button id="aba-fechamentos" class="aba-btn" onclick="trocarAba('fechamentos')">Fechamentos Aprovados</button>
+</div>
+
+<!-- ── Seção: Coletas ── -->
+<div id="secao-coletas">
+  <div class="filtros">
+    <input type="text" id="filtroCliente" placeholder="Buscar por cliente..." oninput="filtrarColetas()">
+    <input type="text" id="filtroNumero" placeholder="Buscar por número de coleta..." oninput="filtrarColetas()">
+    <input type="text" id="filtroNF" placeholder="Buscar por nota fiscal..." oninput="filtrarColetas()">
+    <select id="filtroStatus" onchange="filtrarColetas()">
+      <option value="">Todos os status</option>
+      <option value="Agendada">Agendada</option>
+      <option value="Realizada">Realizada</option>
+    </select>
+    <button onclick="filtrarColetas()">Filtrar</button>
+    <button onclick="exportarParaCSV()" style="background:linear-gradient(135deg,#00bcd4,#009688);">Exportar CSV</button>
+  </div>
+  <div id="listaColetas"></div>
+</div>
+
+<!-- ── Seção: Etiquetas ── -->
+<div id="secao-etiquetas" style="display:none;">
+  <div class="filtros-et">
+    <input type="text" id="filtroEtCliente" placeholder="Buscar por cliente...">
+    <input type="text" id="filtroEtNF" placeholder="Buscar por NF / Orçamento...">
+    <button onclick="filtrarEtiquetas()">Filtrar</button>
+    <button onclick="exportarEtiquetasCSV()" style="background:linear-gradient(135deg,#00bcd4,#009688);">Exportar CSV</button>
+  </div>
+  <div id="listaEtiquetas"></div>
+</div>
+
+<!-- ── Seção: Fechamentos Aprovados ── -->
+<div id="secao-fechamentos" style="display:none;">
+  <div class="filtros-et">
+    <input type="text" id="filtroFechCliente" placeholder="Buscar por cliente...">
+    <input type="text" id="filtroFechNF" placeholder="Buscar por NF / Orçamento...">
+    <button onclick="filtrarFechamentos()">Filtrar</button>
+    <button onclick="exportarFechamentosCSV()" style="background:linear-gradient(135deg,#00bcd4,#009688);">Exportar CSV</button>
+  </div>
+  <div id="listaFechamentosAprovados"></div>
+</div>
+
+<!-- Modal de Edição de Etiqueta -->
+<div id="modal-etiqueta" class="modal-overlay" style="display:none">
+  <div class="modal-card">
+    <button class="modal-fechar" onclick="fecharModal()">✕</button>
+    <h2>Editar Etiqueta</h2>
+    <form id="formModalEtiqueta" onsubmit="salvarEdicaoEtiqueta(event)">
+      <label for="modal-cliente">Cliente:</label>
+      <input type="text" id="modal-cliente" required>
+
+      <label id="modal-lblNf" for="modal-nf">NF / Orçamento:</label>
+      <input type="text" id="modal-nf" required
+             onblur="this.value = normalizarNF(this.value)">
+
+      <label for="modal-tipoDoc">Tipo de Documento:</label>
+      <select id="modal-tipoDoc" onchange="atualizarModalRotuloNf()">
+        <option value="nf">Nota Fiscal</option>
+        <option value="orcamento">Orçamento</option>
+      </select>
+
+      <label for="modal-data">Data:</label>
+      <input type="date" id="modal-data">
+
+      <label for="modal-tipoEntrega">Tipo de Entrega:</label>
+      <select id="modal-tipoEntrega" onchange="atualizarLabelEntrega()">
+        <option value="transportadora">Transportadora</option>
+        <option value="representante">Representante</option>
+      </select>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div>
+          <label id="modal-label-entrega" for="modal-transportadora">Transportadora:</label>
+          <input type="text" id="modal-transportadora">
+        </div>
+        <div>
+          <label for="modal-kg">Peso Total (kg):</label>
+          <input type="number" id="modal-kg" step="0.1" min="0">
+        </div>
+      </div>
+
+      <p class="caixas-titulo">Caixas:</p>
+      <div id="modal-caixas-lista"></div>
+      <button type="button" class="btn-add-caixa" onclick="adicionarCaixaModal()">+ Adicionar Caixa</button>
+
+      <button type="submit">Salvar Alterações</button>
+    </form>
+  </div>
+</div>
+
+<!-- Área de reimpressão -->
+<div id="area-impressao"></div>
+
+<!-- Modal para visualização de imagem (Comprovante) -->
+<div id="modal-imagem" class="modal-img-overlay" onclick="fecharModalImagem()">
+  <div class="modal-img-container" onclick="event.stopPropagation()">
+    <button class="modal-img-close" onclick="fecharModalImagem()">✕</button>
+    <img id="img-full" class="modal-img-content" src="" alt="Comprovante Full">
+    <div id="img-caption" class="modal-img-caption"></div>
+  </div>
+</div>
+
+<!-- Firebase SDKs (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js?v=2.0"></script>
+<script src="auth.js?v=2.0"></script>
+<script src="consulta.js?v=2.0"></script>
+
+<footer class="rodape">
+  <p>Produzido por <strong>Startaweb</strong> | Sistema interno de etiquetas</p>
+  <p>Todos os direitos reservados © 2025<br>
+  Contato: robertoursinejesus@gmail.com | (11) 98285-6216</p>
+</footer>
+</body>
+</html>

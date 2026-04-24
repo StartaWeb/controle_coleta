@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fechamento de Pedido - Ebenezer</title>
+  <link rel="stylesheet" href="style.css?v=2.0">
+  <style>
+    .fechamento-section {
+      max-width: 720px;
+      margin: 0 auto 30px;
+      background: rgba(255,255,255,0.78);
+      backdrop-filter: blur(15px);
+      padding: 32px 40px;
+      border-radius: 20px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+      border: 1px solid rgba(255,255,255,0.7);
+    }
+    .fechamento-section h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2e103b;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(156,39,176,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .campos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+    }
+    .campo-full { grid-column: 1 / -1; }
+    .campo-lido {
+      background: rgba(241,245,249,0.8);
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 15px;
+      color: #2d3748;
+      font-family: inherit;
+      font-weight: 500;
+      min-height: 44px;
+    }
+    .campo-lido.destaque {
+      background: rgba(156,39,176,0.07);
+      border-color: rgba(156,39,176,0.25);
+      color: #6a1b9a;
+      font-weight: 600;
+    }
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .radio-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: 30px;
+      border: 2px solid rgba(156,39,176,0.25);
+      background: rgba(255,255,255,0.8);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #6a1b9a;
+      transition: all 0.25s ease;
+    }
+    .radio-pill input[type=radio] { display: none; }
+    .radio-pill.selecionado {
+      background: linear-gradient(135deg, #f50057, #9c27b0);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 12px rgba(156,39,176,0.3);
+    }
+    .parcelas-wrap {
+      display: none;
+      margin-top: 12px;
+    }
+    .upload-area {
+      border: 2px dashed rgba(156,39,176,0.3);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(156,39,176,0.04);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .upload-area:hover {
+      border-color: #9c27b0;
+      background: rgba(156,39,176,0.08);
+    }
+    .upload-area input { display: none; }
+    .upload-preview {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 8px;
+      margin-top: 12px;
+      display: none;
+    }
+    .upload-gallery-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .preview-item {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 1/1;
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .preview-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .btn-remove-img {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(244,67,54,0.85);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .btn-remove-img:hover { background: #f44336; transform: scale(1.1); }
+    .btn-enviar {
+      width: 100%;
+      padding: 16px;
+      font-size: 17px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f50057, #9c27b0);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 6px 18px rgba(156,39,176,0.3);
+      transition: all 0.3s ease;
+      letter-spacing: 0.3px;
+    }
+    .btn-enviar:hover { background: #7b1fa2; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(156,39,176,0.3); }
+
+    .status-devolvido {
+      display: none;
+      background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+      border: 1px solid #ffb74d;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(255,152,0,0.1);
+      animation: slideDown 0.4s ease;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .status-devolvido h3 { color: #e65100; margin-bottom: 6px; font-size: 16px; display: flex; align-items: center; gap: 8px; margin-top:0; }
+    .status-devolvido p { color: #bf360c; font-size: 14px; font-weight: 500; margin: 0; }
+    
+    .btn-buscar {
+      padding: 12px 22px;
+      font-size: 15px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #00bcd4, #009688);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 8px;
+      box-shadow: 0 4px 10px rgba(0,188,212,0.25);
+      transition: all 0.3s ease;
+    }
+    .btn-buscar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,188,212,0.35);
+    }
+    .status-devolvido {
+      background: rgba(244,67,54,0.08);
+      border: 2px solid rgba(244,67,54,0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: none;
+    }
+    .status-devolvido h3 {
+      color: #c62828;
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+    .status-devolvido p {
+      color: #b71c1c;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    #listaMeusFechamentos {
+      max-width: 720px;
+      margin: 0 auto 30px;
+    }
+    .fechamento-card {
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      padding: 22px 28px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+      border-left: 6px solid #9c27b0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .fechamento-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+    }
+    .fechamento-card.aguardando { border-left-color: #ff9800; }
+    .fechamento-card.aprovado   { border-left-color: #4caf50; }
+    .fechamento-card.devolvido  { border-left-color: #f44336; }
+    .fc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .fc-badge {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .fc-badge.aguardando { background: rgba(255,152,0,0.15); color: #e65100; }
+    .fc-badge.aprovado   { background: rgba(76,175,80,0.15);  color: #2e7d32; }
+    .fc-badge.devolvido  { background: rgba(244,67,54,0.15);  color: #c62828; }
+    .fc-obs {
+      margin-top: 10px;
+      padding: 12px 16px;
+      background: rgba(244,67,54,0.07);
+      border-radius: 8px;
+      border-left: 4px solid #f44336;
+      color: #c62828;
+      font-size: 14px;
+    }
+    .section-title {
+      max-width: 720px;
+      margin: 32px auto 16px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #2e103b;
+    }
+    label { display: block; font-weight: 600; color: #4a5568; font-size: 14px; }
+    label span.optional { font-weight: 400; color: #a0aec0; font-size: 12px; margin-left: 4px; }
+    input[type=text], input[type=number], select, textarea {
+      width: 100%;
+      padding: 11px 15px;
+      margin-top: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #2d3748;
+      background: rgba(255,255,255,0.9);
+      transition: all 0.3s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #9c27b0;
+      box-shadow: 0 0 0 4px rgba(156,39,176,0.12);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+  </style>
+</head>
+<body>
+  <nav class="menu"><ul></ul></nav>
+
+  <div style="text-align:center; margin-bottom: 10px;">
+    <img class="EbenezerTitulo" src="EbenezerTitulo.png" alt="Ebenezer">
+  </div>
+
+  <h1>Fechamento de Pedido</h1>
+
+  <!-- Alerta: fechamento devolvido -->
+  <div class="status-devolvido" id="alertaDevolvido">
+    <h3>⚠️ Fechamento Devolvido para Correção</h3>
+    <p id="textoObsDevolvido"></p>
+  </div>
+
+  <div style="text-align: center;">
+    <img class="EbenezerTitulo" src="EbenezerTitulo.png" alt="EbenezerTitulo">
+  </div>
+
+  <!-- ── Busca de etiqueta ── -->
+  <div class="fechamento-section">
+    <h2>🔍 Buscar Pedido</h2>
+    <div class="campos-grid">
+      <div class="campo-full">
+        <label>NF / Nº do Orçamento <span class="optional">(para importar dados)</span></label>
+        <input type="text" id="buscaNF"
+               placeholder="Digite o número da NF ou Orçamento..."
+               onblur="this.value = normalizarNF(this.value)">
+      </div>
+    </div>
+    <button class="btn-buscar" onclick="buscarDadosPedido()">🔍 Buscar e Importar Dados</button>
+  </div>
+
+  <!-- ── Dados do Cliente ── -->
+  <div class="fechamento-section">
+    <h2>👤 Dados do Cliente</h2>
+    <div class="campos-grid">
+      <div>
+        <label>Código do Cliente</label>
+        <input type="text" id="codigoCliente" placeholder="Ex: 1042">
+      </div>
+      <div>
+        <label>Nome do Cliente <span class="optional">(importado)</span></label>
+        <div class="campo-lido" id="nomeClienteDisplay">—</div>
+      </div>
+      <div>
+        <label>Orçamento / NF <span class="optional">(importado)</span></label>
+        <div class="campo-lido destaque" id="orcamentoDisplay">—</div>
+      </div>
+      <div>
+        <label>Representante <span class="optional">(importado)</span></label>
+        <div class="campo-lido" id="representanteDisplay">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Dados Financeiros ── -->
+  <div class="fechamento-section">
+    <h2>💰 Dados Financeiros</h2>
+
+    <label>Total Caixas <span class="optional">(importado)</span></label>
+    <div class="campo-lido" id="totalCaixasDisplay">—</div>
+
+    <label style="margin-top:14px;">KG Total <span class="optional">(importado)</span></label>
+    <div class="campo-lido" id="kgDisplay">—</div>
+
+    <label style="margin-top:14px;">Dimensões por Caixa <span class="optional">(importado)</span></label>
+    <div class="campo-lido" id="dimensoesDisplay">—</div>
+
+    <label style="margin-top:20px;">Forma de Pagamento</label>
+    <div class="radio-group" id="grupoPagamento">
+      <label class="radio-pill" id="pill-pix">
+        <input type="radio" name="pagamento" value="pix"> 💠 PIX
+      </label>
+      <label class="radio-pill" id="pill-cartao">
+        <input type="radio" name="pagamento" value="cartao"> 💳 Cartão
+      </label>
+      <label class="radio-pill" id="pill-boleto">
+        <input type="radio" name="pagamento" value="boleto"> 📄 Boleto
+      </label>
+      <label class="radio-pill" id="pill-pagamento-outros">
+        <input type="radio" name="pagamento" value="outros"> ➕ Outros
+      </label>
+    </div>
+    <div id="pagamentoOutrosWrap" style="display:none; margin-top:12px;">
+      <label>Especifique a Forma de Pagamento</label>
+      <input type="text" id="pagamentoOutros" placeholder="Digite aqui...">
+    </div>
+    <div class="parcelas-wrap" id="parcelasWrap">
+      <label>Número de Parcelas</label>
+      <input type="number" id="numParcelas" min="1" max="24" placeholder="Ex: 3">
+    </div>
+
+    <label style="margin-top:20px;">Tem Campanha?</label>
+    <div class="radio-group" id="grupoCampanha">
+      <label class="radio-pill" id="pill-campanha-sim">
+        <input type="radio" name="campanha" value="sim"> ✅ SIM
+      </label>
+      <label class="radio-pill" id="pill-campanha-nao">
+        <input type="radio" name="campanha" value="nao"> ❌ NÃO
+      </label>
+    </div>
+  </div>
+
+  <!-- ── Forma de Envio ── -->
+  <div class="fechamento-section">
+    <h2>📦 Forma de Envio</h2>
+    <div class="radio-group" id="grupoEnvio">
+      <label class="radio-pill" id="pill-correios">
+        <input type="radio" name="envio" value="correios"> 📮 Correios
+      </label>
+      <label class="radio-pill" id="pill-sedex">
+        <input type="radio" name="envio" value="sedex"> 🚀 SEDEX
+      </label>
+      <label class="radio-pill" id="pill-transportadora">
+        <input type="radio" name="envio" value="transportadora"> 🚚 Transportadora
+      </label>
+      <label class="radio-pill" id="pill-envio-outros">
+        <input type="radio" name="envio" value="outros"> ➕ Outros
+      </label>
+    </div>
+    <div id="envioOutrosWrap" style="display:none; margin-top:12px;">
+      <label>Especifique a Forma de Envio</label>
+      <input type="text" id="envioOutros" placeholder="Digite aqui...">
+    </div>
+
+    <div id="freteWrap" style="display:none; margin-top:14px;">
+      <label>Valor do Frete (R$)</label>
+      <input type="number" id="valorFrete" min="0" step="0.01" placeholder="0,00">
+    </div>
+    <div id="transportadoraWrap" style="display:none; margin-top:14px;">
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:12px;">
+        <div>
+          <label>Nome da Transportadora</label>
+          <input type="text" id="nomeTransportadora" placeholder="Qual transportadora?">
+        </div>
+        <div>
+          <label>Código Transp.</label>
+          <input type="text" id="codigoTransportadora" placeholder="Ex: 502">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Anexo (Opcional) ── -->
+  <div class="fechamento-section" id="secaoAnexo">
+    <h2>📎 Comprovante / Documento</h2>
+    <p style="font-size:13px; color:#718096; margin-bottom:14px;">
+      Opcional para PIX e Cartão. Anexe comprovante ou comprovante de pagamento.
+    </p>
+    <label class="upload-area" for="inputAnexo" onclick="document.getElementById('inputAnexo').click()">
+      <div style="font-size:36px;">📎</div>
+      <p style="font-weight:600; color:#6a1b9a; margin:8px 0 4px;">Clique para selecionar imagem</p>
+      <p style="font-size:12px; color:#a0aec0;">JPG, PNG, WEBP até 5MB</p>
+    </label>
+    <input type="file" id="inputAnexo" accept="image/*" multiple>
+    <div id="uploadGallery" class="upload-gallery-container"></div>
+  </div>
+
+  <!-- ── Observações ── -->
+  <div class="fechamento-section">
+    <h2>📝 Observações Gerais</h2>
+    <textarea id="observacoes" placeholder="Adicione alguma observação relevante sobre este pedido..."></textarea>
+  </div>
+
+  <!-- ── Enviar ── -->
+  <div class="fechamento-section">
+    <button class="btn-enviar" onclick="enviarFechamento()">🚀 Enviar para Aprovação</button>
+  </div>
+
+  <!-- ── Meus Fechamentos ── -->
+  <p class="section-title">📂 Meus Fechamentos</p>
+  <div id="listaMeusFechamentos"></div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js?v=2.0"></script>
+  <script src="auth.js?v=2.0"></script>
+
+  <script>
+    // ── dados importados da etiqueta ──
+    let etiquetaImportada = null;
+    let unsubMeusFechamentos = null;
+    let _meusFechamentosCache = [];
+    let _fechamentoEdicaoId = null;
+
+    // ── Seleção de pills ──
+    function setupRadioPills(groupSelector, inputName) {
+      document.querySelectorAll(`#${groupSelector} .radio-pill`).forEach(pill => {
+        pill.querySelector('input').addEventListener('change', () => {
+          document.querySelectorAll(`#${groupSelector} .radio-pill`).forEach(p => p.classList.remove('selecionado'));
+          pill.classList.add('selecionado');
+          if (inputName === 'pagamento') onPagamentoChange(pill.querySelector('input').value);
+          if (inputName === 'envio')     onEnvioChange(pill.querySelector('input').value);
+        });
+      });
+    }
+
+    function onPagamentoChange(val) {
+      // Exibe parcelas para cartão e boleto
+      document.getElementById('parcelasWrap').style.display = (val === 'cartao' || val === 'boleto') ? 'block' : 'none';
+    // Sempre exibe anexo como opcional
+    document.getElementById('secaoAnexo').style.display = 'block';
+      // Exibe campo 'Outros'
+      document.getElementById('pagamentoOutrosWrap').style.display = (val === 'outros') ? 'block' : 'none';
+    }
+
+    function onEnvioChange(val) {
+      // Exibe frete para SEDEX e correios
+      document.getElementById('freteWrap').style.display = (val === 'sedex' || val === 'correios') ? 'block' : 'none';
+      // Exibe nome se for transportadora
+      document.getElementById('transportadoraWrap').style.display = (val === 'transportadora') ? 'block' : 'none';
+      // Exibe campo 'Outros'
+      document.getElementById('envioOutrosWrap').style.display = (val === 'outros') ? 'block' : 'none';
+    }
+
+    // ── Buscar dados da etiqueta ──
+    async function buscarDadosPedido() {
+      const nf = normalizarNF(document.getElementById('buscaNF').value);
+      if (!nf) {
+        mostrarToast('Digite o número da NF ou Orçamento.', 'aviso');
+        return;
+      }
+
+      const btn = document.querySelector('.btn-buscar');
+      const originalText = btn ? btn.textContent : '';
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Buscando...'; }
+
+      try {
+        const et = await buscarEtiquetaPorNF(nf);
+        if (!et) {
+          mostrarToast(`Nenhuma etiqueta encontrada para "${nf}". Verifique se a etiqueta foi gerada ou tente o número do orçamento.`, 'erro', 7000);
+          return;
+        }
+        etiquetaImportada = et;
+        preencherDadosImportados(et);
+        mostrarToast(`✅ Dados de "${et.cliente || nf}" importados com sucesso!`, 'sucesso');
+      } catch (err) {
+        console.error('Erro em buscarDadosPedido:', err);
+        mostrarToast('Erro ao buscar dados: ' + err.message, 'erro');
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = originalText; }
+      }
+    }
+
+
+    function preencherDadosImportados(et) {
+      document.getElementById('nomeClienteDisplay').textContent = et.cliente || '—';
+      document.getElementById('orcamentoDisplay').textContent = et.nf || '—';
+      document.getElementById('totalCaixasDisplay').textContent = et.totalCaixas != null ? et.totalCaixas : (et.caixas?.length ?? '—');
+      document.getElementById('kgDisplay').textContent = et.kg != null ? `${et.kg} kg` : '—';
+      document.getElementById('representanteDisplay').textContent =
+        et.entregaTipo === 'representante' ? (et.transportadora || '—') : (et.entregaTipo || '—');
+
+      // Dimensões por caixa
+      if (et.dimensoes && et.dimensoes.length > 0) {
+        const txt = et.dimensoes.map((d, i) =>
+          `Cx${i + 1}: ${d.a || 0}×${d.l || 0}×${d.c || 0} cm`
+        ).join(' | ');
+        document.getElementById('dimensoesDisplay').textContent = txt;
+      } else {
+        document.getElementById('dimensoesDisplay').textContent = '—';
+      }
+    }
+
+    // ── Previsualização de imagens ──
+    let _imagensBase64Cache = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setupRadioPills('grupoPagamento', 'pagamento');
+      setupRadioPills('grupoCampanha', 'campanha');
+      setupRadioPills('grupoEnvio', 'envio');
+
+      document.getElementById('inputAnexo').addEventListener('change', async function () {
+        const files = Array.from(this.files);
+        if (!files.length) return;
+
+        // Limite de 5 imagens para não estourar o limite do Firestore (1MB por doc)
+        if (_imagensBase64Cache.length + files.length > 5) {
+          mostrarToast('Limite máximo de 5 imagens atingido.', 'aviso');
+          return;
+        }
+
+        for (const file of files) {
+          if (file.size > 5 * 1024 * 1024) {
+            mostrarToast(`Imagem "${file.name}" é muito grande. Máximo 5MB por foto.`, 'aviso');
+            continue;
+          }
+          try {
+            const base64 = await lerArquivoBase64(file);
+            _imagensBase64Cache.push(base64);
+          } catch (err) {
+            console.error('Erro ao processar imagem:', err);
+          }
+        }
+        renderGallery();
+        this.value = ''; // Limpa o input para permitir selecionar os mesmos arquivos novamente se removidos
+      });
+
+      // Escutar fechamentos após auth pronto
+      window.addEventListener('authPronto', ({ detail }) => {
+        const uid = firebase.auth().currentUser?.uid;
+        const perfil = detail.perfil;
+        if (!uid) return;
+
+        // Admin pode criar e enviar fechamentos normalmente
+
+        if (unsubMeusFechamentos) unsubMeusFechamentos();
+
+        // Admin e whatsapp vêm todos; demais só os próprios
+        if (perfil === 'admin' || perfil === 'whatsapp') {
+          unsubMeusFechamentos = ouvirTodosFechamentos(lista => {
+            _meusFechamentosCache = lista;
+            renderMeusFechamentos(lista);
+          });
+        } else {
+          unsubMeusFechamentos = ouvirMeusFechamentos(uid, lista => {
+            _meusFechamentosCache = lista;
+            renderMeusFechamentos(lista);
+          });
+        }
+
+        // Verifica se há pedido para edição via URL (?edit=ID)
+        // Funciona para qualquer perfil com acesso à página
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('edit');
+        if (editId) {
+          carregarParaEdicao(editId);
+        }
+      });
+    });
+
+    function renderGallery() {
+      const container = document.getElementById('uploadGallery');
+      container.innerHTML = '';
+      _imagensBase64Cache.forEach((img, index) => {
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        div.innerHTML = `
+          <img src="${img}" alt="Preview ${index + 1}">
+          <button class="btn-remove-img" onclick="removeImage(${index})">✕</button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function removeImage(index) {
+      _imagensBase64Cache.splice(index, 1);
+      renderGallery();
+    }
+
+    // ── Enviar para aprovação ──
+    async function enviarFechamento() {
+      const codigoCliente = document.getElementById('codigoCliente').value.trim();
+      if (!codigoCliente) { mostrarToast('Informe o código do cliente.', 'aviso'); return; }
+      if (!etiquetaImportada) { mostrarToast('Busque e importe uma etiqueta antes de enviar.', 'aviso'); return; }
+
+      // Bloquear se já existir um fechamento para este orçamento (e não for edição)
+      if (!_fechamentoEdicaoId) {
+        try {
+          const existe = await checarFechamentoExistente(etiquetaImportada.nf);
+          if (existe) {
+            mostrarToast(`Já existe um fechamento para o orçamento/NF ${etiquetaImportada.nf}. Verifique em Consultas.`, 'aviso', 7000);
+            return;
+          }
+        } catch (e) {
+          console.warn('Erro ao validar duplicidade de fechamento:', e);
+        }
+      }
+
+      const pagamentoEl = document.querySelector('input[name="pagamento"]:checked');
+      if (!pagamentoEl) { mostrarToast('Selecione a forma de pagamento.', 'aviso'); return; }
+      let pagamento = pagamentoEl.value;
+      const nrOrcamento = normalizarNF(document.getElementById('buscaNF').value);
+      const pagamentoOutros = document.getElementById('pagamentoOutros').value.trim();
+      if (pagamento === 'outros') {
+        if (!pagamentoOutros) { mostrarToast('Especifique a outra forma de pagamento.', 'aviso'); return; }
+        pagamento = pagamentoOutros;
+      }
+
+      const envioEl = document.querySelector('input[name="envio"]:checked');
+      if (!envioEl) { mostrarToast('Selecione a forma de envio.', 'aviso'); return; }
+      let envio = envioEl.value;
+      const envioOutros = document.getElementById('envioOutros').value.trim();
+      if (envio === 'outros') {
+        if (!envioOutros) { mostrarToast('Especifique a outra forma de envio.', 'aviso'); return; }
+        envio = envioOutros;
+      }
+
+      const campanhaEl = document.querySelector('input[name="campanha"]:checked');
+      if (!campanhaEl) { mostrarToast('Informe se tem campanha.', 'aviso'); return; }
+
+      const numParcelas = parseInt(document.getElementById('numParcelas').value) || 1;
+      const valorFrete  = parseFloat(document.getElementById('valorFrete').value) || 0;
+      const nomeTransportadora = document.getElementById('nomeTransportadora').value.trim();
+      const codigoTransportadora = document.getElementById('codigoTransportadora').value.trim();
+      const obsOperador = document.getElementById('observacoes').value.trim();
+      const user = firebase.auth().currentUser;
+
+      // Validações
+      if (envio === 'transportadora') {
+        if (!nomeTransportadora) { mostrarToast('Informe o nome da transportadora.', 'aviso'); return; }
+        if (!codigoTransportadora) { mostrarToast('Informe o código da transportadora.', 'aviso'); return; }
+      }
+      if ((envio === 'correios' || envio === 'sedex') && valorFrete <= 0) {
+        mostrarToast('Informe o valor do frete válido e superior a zero.', 'aviso');
+        return;
+      }
+
+      // Imagens já estão no _imagensBase64Cache (array)
+
+      const dados = {
+        uid: user.uid,
+        nomeOperador: window._nomeUsuario || user.email,
+        codigoCliente,
+        cliente: etiquetaImportada.cliente,
+        orcamento: etiquetaImportada.nf,
+        tipoDoc: etiquetaImportada.tipoDoc,
+        representante: etiquetaImportada.entregaTipo === 'representante'
+          ? etiquetaImportada.transportadora : etiquetaImportada.entregaTipo,
+        totalCaixas: etiquetaImportada.totalCaixas ?? etiquetaImportada.caixas?.length,
+        kg: etiquetaImportada.kg ?? 0,
+        caixas: etiquetaImportada.caixas ?? [],
+        dimensoes: etiquetaImportada.dimensoes ?? [],
+        pagamento,
+        numParcelas: (pagamento === 'cartao' || pagamento === 'boleto') ? numParcelas : null,
+        envio,
+        valorFrete: (envio === 'sedex' || envio === 'correios') ? valorFrete : null,
+        nomeTransportadora: (envio === 'transportadora') ? nomeTransportadora : null,
+        codigoTransportadora: (envio === 'transportadora') ? codigoTransportadora : null,
+        campanha: campanhaEl.value,
+        imagensBase64: _imagensBase64Cache,
+        obsOperador,
+        etiquetaId: etiquetaImportada._id,
+        // Data de geração da etiqueta (para cálculo de atraso no dashboard)
+        etiquetaCriadaEm: etiquetaImportada.criadoEm || null
+      };
+
+      try {
+        if (_fechamentoEdicaoId) {
+          await atualizarFechamento(_fechamentoEdicaoId, { ...dados, status: 'aguardando', obs: null });
+          if (window._perfilUsuario === 'expedicao') {
+            await registrarLog(window._nomeUsuario, 'Editou fechamento existente', _fechamentoEdicaoId, { orcamento: dados.orcamento });
+          }
+          mostrarToast('Fechamento corrigido e reenviado para aprovação!', 'sucesso', 5000);
+        } else {
+          const newId = await salvarFechamento(dados);
+          if (window._perfilUsuario === 'expedicao') {
+            await registrarLog(window._nomeUsuario, 'Criou novo fechamento', newId, { orcamento: dados.orcamento });
+          }
+          mostrarToast('Fechamento enviado para aprovação com sucesso!', 'sucesso', 5000);
+        }
+
+        // Limpar formulário
+        _fechamentoEdicaoId = null;
+        document.querySelector('.btn-enviar').textContent = '🚀 Enviar para Aprovação';
+        document.getElementById('buscaNF').value = '';
+        document.getElementById('codigoCliente').value = '';
+        document.getElementById('observacoes').value = '';
+        _imagensBase64Cache = [];
+        renderGallery();
+        document.getElementById('inputAnexo').value = '';
+        ['nomeClienteDisplay','orcamentoDisplay','totalCaixasDisplay','kgDisplay','dimensoesDisplay','representanteDisplay'].forEach(id => {
+          document.getElementById(id).textContent = '—';
+        });
+        document.querySelectorAll('.radio-pill').forEach(p => p.classList.remove('selecionado'));
+        document.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+        document.getElementById('parcelasWrap').style.display = 'none';
+        document.getElementById('freteWrap').style.display = 'none';
+        document.getElementById('transportadoraWrap').style.display = 'none';
+        document.getElementById('secaoAnexo').style.display = 'none';
+        document.getElementById('nomeTransportadora').value = '';
+        document.getElementById('codigoTransportadora').value = '';
+        document.getElementById('valorFrete').value = '';
+        document.getElementById('numParcelas').value = '';
+        etiquetaImportada = null;
+        
+      } catch (err) {
+        mostrarToast('Erro ao enviar fechamento: ' + err.message, 'erro');
+      }
+    }
+
+    function lerArquivoBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const resized = await redimensionarImagem(e.target.result, 1000, 1000);
+            resolve(resized);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function redimensionarImagem(base64, maxWidth, maxHeight) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = base64;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.8)); // 0.8 quality
+        };
+        img.onerror = reject;
+      });
+    }
+
+    function carregarParaEdicao(id) {
+      // Tenta primeiro no cache local
+      const fCache = _meusFechamentosCache.find(x => x._id === id);
+      if (fCache) {
+        preencherParaEdicao(fCache);
+        return;
+      }
+      // Cache ainda vazio — busca direto no Firestore
+      db.collection('fechamentos').doc(id).get().then(doc => {
+        if (doc.exists) {
+          preencherParaEdicao({ _id: doc.id, ...doc.data() });
+        } else {
+          mostrarToast('Fechamento não encontrado. Tente novamente.', 'aviso');
+        }
+      }).catch(err => {
+        mostrarToast('Erro ao carregar fechamento: ' + err.message, 'erro');
+      });
+    }
+
+    function preencherParaEdicao(f) {
+      _fechamentoEdicaoId = f._id;
+      document.querySelector('.btn-enviar').textContent = (f.status === 'aprovado' && window._perfilUsuario === 'admin') 
+        ? '💾 Salvar Alterações no Fechamento Aprovado' 
+        : '💾 Atualizar Fechamento Corrigido';
+
+      // Importar mock de etiqueta
+      etiquetaImportada = {
+         _id: f.etiquetaId,
+         cliente: f.cliente,
+         nf: f.orcamento,
+         tipoDoc: f.tipoDoc,
+         totalCaixas: f.totalCaixas,
+         kg: f.kg,
+         dimensoes: f.dimensoes,
+         entregaTipo: '', transportadora: f.representante
+      };
+      preencherDadosImportados(etiquetaImportada);
+
+      document.getElementById('buscaNF').value = f.orcamento || '';
+      document.getElementById('codigoCliente').value = f.codigoCliente || '';
+
+      // Setar payment
+      const pRadio = document.querySelector(`input[name="pagamento"][value="${f.pagamento}"]`);
+      if (pRadio) {
+         pRadio.checked = true;
+         pRadio.dispatchEvent(new Event('change'));
+         if (f.numParcelas) document.getElementById('numParcelas').value = f.numParcelas;
+      }
+
+      // Setar envio
+      const eRadio = document.querySelector(`input[name="envio"][value="${f.envio}"]`);
+      if (eRadio) {
+         eRadio.checked = true;
+         eRadio.dispatchEvent(new Event('change'));
+         if (f.valorFrete) document.getElementById('valorFrete').value = f.valorFrete;
+         if (f.nomeTransportadora) document.getElementById('nomeTransportadora').value = f.nomeTransportadora;
+         if (f.codigoTransportadora) document.getElementById('codigoTransportadora').value = f.codigoTransportadora;
+      }
+
+      // Setar campanha
+      const cRadio = document.querySelector(`input[name="campanha"][value="${f.campanha}"]`);
+      if (cRadio) {
+         cRadio.checked = true;
+         cRadio.dispatchEvent(new Event('change'));
+      }
+
+      if (f.imagensBase64 && f.imagensBase64.length > 0) {
+         _imagensBase64Cache = [...f.imagensBase64];
+         renderGallery();
+      } else if (f.imagemBase64) {
+         // Compatibilidade com registros antigos
+         _imagensBase64Cache = [f.imagemBase64];
+         renderGallery();
+      }
+
+      document.getElementById('observacoes').value = f.obsOperador || '';
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── Renderizar meus fechamentos ──
+    function renderMeusFechamentos(lista) {
+      const container = document.getElementById('listaMeusFechamentos');
+      const alerta = document.getElementById('alertaDevolvido');
+      const textoObs = document.getElementById('textoObsDevolvido');
+
+      // Detectar o mais recente devolvido para exibir alerta no topo
+      const devolvidos = lista.filter(f => f.status === 'devolvido');
+      if (devolvidos.length > 0) {
+        const maisRecente = devolvidos[0]; // já ordenado por data desc
+        textoObs.textContent = maisRecente.obs
+          ? `Orçamento ${maisRecente.orcamento}: ${maisRecente.obs}`
+          : `Orçamento ${maisRecente.orcamento} foi devolvido para correção.`;
+        alerta.style.display = 'block';
+        alerta.style.maxWidth = '720px';
+        alerta.style.margin = '0 auto 24px';
+
+        // Botão "Corrigir Agora" diretamente no alerta do topo
+        const btnExistente = alerta.querySelector('.btn-corrigir-alerta');
+        if (btnExistente) btnExistente.remove();
+
+        const btnCorrigir = document.createElement('button');
+        btnCorrigir.className = 'btn-corrigir-alerta';
+        btnCorrigir.textContent = 'Corrigir Agora';
+        btnCorrigir.style.cssText = `
+          display: block;
+          margin-top: 14px;
+          padding: 11px 28px;
+          background: linear-gradient(135deg, #ff9800, #f57c00);
+          color: #fff;
+          border: none;
+          border-radius: 10px;
+          font-weight: 700;
+          font-size: 14px;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(255,152,0,0.35);
+          transition: all 0.2s ease;
+          letter-spacing: 0.3px;
+        `;
+        btnCorrigir.onmouseenter = () => btnCorrigir.style.transform = 'translateY(-2px)';
+        btnCorrigir.onmouseleave = () => btnCorrigir.style.transform = 'translateY(0)';
+        btnCorrigir.onclick = () => carregarParaEdicao(maisRecente._id);
+        alerta.appendChild(btnCorrigir);
+      } else {
+        alerta.style.display = 'none';
+      }
+
+      if (!lista || lista.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#a0aec0;padding:20px;">Nenhum fechamento enviado ainda.</p>';
+        return;
+      }
+      container.innerHTML = lista.map(f => {
+        const statusLabel = { aguardando: '⏳ Aguardando', aprovado: '✅ Aprovado', devolvido: '⚠️ Devolvido' }[f.status] || f.status;
+        const obsHtml = (f.status === 'devolvido' && f.obs)
+          ? `<div class="fc-obs">📝 <strong>Obs:</strong> ${f.obs}</div>` : '';
+        const btnCortigir = f.status === 'devolvido'
+          ? `<button onclick="carregarParaEdicao('${f._id}')" style="margin-top:10px; padding:8px 16px; font-weight:700; background:linear-gradient(135deg, #ff9800, #f57c00); color:#fff; border:none; border-radius:8px; cursor:pointer; box-shadow: 0 4px 10px rgba(255,152,0,0.3);">✏️ Corrigir Fechamento</button>` : '';
+
+        const pagLabel = { pix: 'PIX', cartao: `Cartão (${f.numParcelas || 1}x)`, boleto: `Boleto (${f.numParcelas || 1}x)` }[f.pagamento] || f.pagamento;
+        
+        const transportadoraFmt = f.nomeTransportadora 
+          ? `${f.nomeTransportadora}${f.codigoTransportadora ? ' (Cód: ' + f.codigoTransportadora + ')' : ''}`
+          : (f.nomeTransportadora || 'N/A');
+
+        const envioLabel = { 
+          correios: `Correios (Frete: R$${(f.valorFrete||0).toFixed(2)})`, 
+          sedex: `SEDEX (Frete: R$${(f.valorFrete||0).toFixed(2)})`, 
+          transportadora: `Transportadora (${transportadoraFmt})` 
+        }[f.envio] || f.envio;
+
+        // Miniaturas
+        const ims = f.imagensBase64 || (f.imagemBase64 ? [f.imagemBase64] : []);
+        const imsHtml = ims.length > 0 
+          ? `<div style="display:flex; gap:6px; margin-top:8px; overflow-x:auto; padding-bottom:4px;">
+              ${ims.map(img => `<img src="${img}" style="width:50px; height:50px; object-fit:cover; border-radius:4px; border:1px solid #eee;">`).join('')}
+             </div>`
+          : '';
+
+        // Se estiver aguardando, mostra apenas dados básicos conforme solicitado
+        if (f.status === 'aguardando') {
+          return `
+            <div class="fechamento-card aguardando">
+              <div class="fc-header">
+                <strong>${f.cliente || 'Sem Nome'}</strong>
+                <span class="fc-badge aguardando">${statusLabel}</span>
+              </div>
+              <p style="font-size:14px;color:#718096;margin:0;">
+                Orçamento: <strong>${f.orcamento || '—'}</strong>
+              </p>
+              ${f.obsOperador ? `
+                <div style="margin-top:10px; padding:8px 12px; background:rgba(156,39,176,0.03); border-radius:8px; border-left:3px solid #9c27b0; font-size:13px; color:#4a5568;">
+                  <strong>Sua Obs:</strong> ${f.obsOperador}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="fechamento-card ${f.status}">
+            <div class="fc-header">
+              <strong>${f.cliente || f.orcamento}</strong>
+              <span class="fc-badge ${f.status}">${statusLabel}</span>
+            </div>
+            <p style="font-size:14px;color:#718096;">
+              Orç: <strong>${f.orcamento || '—'}</strong> &nbsp;|&nbsp;
+              Pagamento: <strong>${pagLabel}</strong> &nbsp;|&nbsp;
+              Envio: <strong>${envioLabel}</strong> &nbsp;|&nbsp;
+              Campanha: <strong>${f.campanha === 'sim' ? 'SIM' : 'NÃO'}</strong>
+            </p>
+            ${f.obsOperador ? `<p style="font-size:13px; color:#4a5568; background:rgba(0,0,0,0.03); padding:8px 12px; border-radius:6px; margin-top:8px;">📝 <strong>Sua Obs:</strong> ${f.obsOperador}</p>` : ''}
+            ${imsHtml}
+            ${obsHtml}
+            ${btnCortigir}
+          </div>
+        `;
+      }).join('');
+    }
+
+  </script>
+
+  <footer class="rodape">
+    <p>Produzido por <strong>Startaweb</strong> | Sistema interno de etiquetas</p>
+    <p>Todos os direitos reservados © 2025<br>
+    Contato: robertoursinejesus@gmail.com | (11) 98285-6216</p>
+  </footer>
+</body>
+</html>

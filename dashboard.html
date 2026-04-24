@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Controle de Coleta Ebenézer</title>
+  <link rel="stylesheet" href="style.css?v=2.0">
+  <style>
+    .dash-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px 40px;
+    }
+
+    .dash-header {
+      margin-bottom: 32px;
+    }
+    .dash-header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #1a0a24;
+      margin: 0 0 4px;
+      letter-spacing: -0.6px;
+      text-align: left;
+    }
+    .dash-header p {
+      font-size: 14px;
+      color: #8a94a6;
+      margin: 0;
+      font-weight: 400;
+    }
+
+    /* ── KPI Grid ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .kpi-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 22px 24px;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.055);
+      border: 1px solid rgba(255,255,255,0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.09);
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #9c27b0, #f50057);
+      border-radius: 18px 18px 0 0;
+    }
+    .kpi-card.alerta::before {
+      background: linear-gradient(90deg, #f50057, #ff6b6b);
+    }
+    .kpi-card.info::before {
+      background: linear-gradient(90deg, #00bcd4, #4caf50);
+    }
+
+    .kpi-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #a0aec0;
+    }
+    .kpi-card.alerta .kpi-tag { color: #e05252; }
+
+    .kpi-value {
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, #2e103b, #7b1fa2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+    .kpi-card.alerta .kpi-value {
+      background: linear-gradient(135deg, #c0392b, #f50057);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .kpi-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+    .kpi-sub {
+      font-size: 12px;
+      color: #b0b8c9;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    /* ── Section Title ── */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 32px 0 14px;
+    }
+    .section-title-bar {
+      width: 4px;
+      height: 22px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #f50057, #9c27b0);
+      flex-shrink: 0;
+    }
+    .section-title-bar.warning {
+      background: linear-gradient(180deg, #ff9800, #f50057);
+    }
+    .section-title h2 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #2e103b;
+      margin: 0;
+      letter-spacing: -0.3px;
+    }
+    .section-title span {
+      font-size: 12px;
+      color: #a0aec0;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    /* ── Listas de atraso ── */
+    .list-wrapper {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .delay-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+      border-left: 4px solid #fbd38d;
+      transition: box-shadow 0.2s ease;
+    }
+    .delay-item:last-child { margin-bottom: 0; }
+    .delay-item:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+    .delay-item.critical { border-left-color: #f56565; }
+
+    .delay-info h4 {
+      margin: 0 0 2px;
+      color: #1a202c;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .delay-info p {
+      margin: 0;
+      font-size: 12px;
+      color: #8a94a6;
+    }
+
+    .delay-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .delay-days {
+      background: #fff0f0;
+      color: #c53030;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.3px;
+    }
+    .delay-days.orange {
+      background: #fffaf0;
+      color: #c05621;
+    }
+
+    .btn-action {
+      padding: 7px 14px;
+      background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(106,27,154,0.2);
+    }
+    .btn-action:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(106,27,154,0.3);
+    }
+
+    .lista-vazia {
+      text-align: center;
+      padding: 24px 20px;
+      color: #48bb78;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .lista-carregando {
+      text-align: center;
+      padding: 24px 20px;
+      color: #a0aec0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="menu">
+    <ul>
+      <!-- Preenchido pelo auth.js -->
+    </ul>
+  </nav>
+
+  <div class="dash-container">
+
+    <div class="dash-header">
+      <div style="text-align: left; margin-bottom: 20px;">
+        <img class="EbenezerTitulo" src="EbenezerTitulo.png" alt="EbenezerTitulo" style="max-width: 220px;">
+      </div>
+      <h1>Dashboard de Performance</h1>
+      <p>Monitoramento em tempo real — Controle de Coleta Ebenézer</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card alerta">
+        <div class="kpi-tag">Atenção</div>
+        <div class="kpi-value" id="kpi-orc-delay">—</div>
+        <div class="kpi-label">Orçamentos Atrasados</div>
+        <div class="kpi-sub">Aguardando há mais de 3 dias</div>
+      </div>
+
+      <div class="kpi-card alerta">
+        <div class="kpi-tag">Atenção</div>
+        <div class="kpi-value" id="kpi-coleta-delay">—</div>
+        <div class="kpi-label">Coletas Pendentes</div>
+        <div class="kpi-sub">Não realizadas há mais de 3 dias</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-tag">Aprovação</div>
+        <div class="kpi-value" id="kpi-pendente">—</div>
+        <div class="kpi-label">Aguardando Aprovação</div>
+        <div class="kpi-sub">Total de orçamentos em fila</div>
+      </div>
+
+      <div class="kpi-card info">
+        <div class="kpi-tag">Hoje</div>
+        <div class="kpi-value" id="kpi-etiquetas-hoje">—</div>
+        <div class="kpi-label">Etiquetas Emitidas</div>
+        <div class="kpi-sub">Criadas nas últimas 24h</div>
+      </div>
+
+      <div class="kpi-card" style="--bar-color: linear-gradient(90deg,#00bcd4,#0097a7);">
+        <div class="kpi-tag">Total ativo</div>
+        <div class="kpi-value" id="kpi-coletas-agendadas" style="background:linear-gradient(135deg,#00838f,#006064);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">—</div>
+        <div class="kpi-label">Coletas Agendadas</div>
+        <div class="kpi-sub">Ainda não realizadas</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <div class="section-title-bar warning"></div>
+      <h2>Orçamentos com Atraso Crítico</h2>
+      <span>aguardando aprovação há mais de 3 dias</span>
+    </div>
+    <div class="list-wrapper" id="lista-orc-atraso">
+      <p class="lista-carregando">Carregando dados...</p>
+    </div>
+
+    <div class="section-title">
+      <div class="section-title-bar"></div>
+      <h2>Fila de Aprovação (Geral)</h2>
+      <span>todos os orçamentos aguardando faturamento</span>
+    </div>
+    <div class="list-wrapper" id="lista-pendente-total">
+      <p class="lista-carregando">Carregando dados...</p>
+    </div>
+
+    <div class="section-title">
+      <div class="section-title-bar"></div>
+      <h2>Coletas Pendentes</h2>
+      <span>agendadas há mais de 3 dias sem realização</span>
+    </div>
+    <div class="list-wrapper" id="lista-coleta-atraso">
+      <p class="lista-carregando">Carregando dados...</p>
+    </div>
+
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js?v=2.0"></script>
+  <script src="auth.js?v=2.0"></script>
+  <script src="dashboard.js?v=2.0"></script>
+
+</body>
+</html>
