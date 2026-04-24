@@ -429,8 +429,8 @@
   <!-- ── Anexo (Opcional) ── -->
   <div class="fechamento-section" id="secaoAnexo">
     <h2>📎 Comprovante / Documento</h2>
-    <p style="font-size:13px; color:#718096; margin-bottom:14px;">
-      Opcional para PIX e Cartão. Anexe comprovante ou comprovante de pagamento.
+    <p id="labelOpcionalAnexo" style="font-size:13px; color:#718096; margin-bottom:14px;">
+      Anexe o comprovante ou documento (Obrigatório para PIX/Cartão).
     </p>
     <label class="upload-area" for="inputAnexo" onclick="document.getElementById('inputAnexo').click()">
       <div style="font-size:36px;">📎</div>
@@ -486,8 +486,17 @@
     function onPagamentoChange(val) {
       // Exibe parcelas para cartão e boleto
       document.getElementById('parcelasWrap').style.display = (val === 'cartao' || val === 'boleto') ? 'block' : 'none';
-    // Sempre exibe anexo como opcional
-    document.getElementById('secaoAnexo').style.display = 'block';
+      // Exibe anexo apenas se não for boleto
+      document.getElementById('secaoAnexo').style.display = (val === 'boleto') ? 'none' : 'block';
+      
+      const labelOpc = document.getElementById('labelOpcionalAnexo');
+      if (val === 'pix' || val === 'cartao') {
+        labelOpc.innerHTML = '<strong>Obrigatório:</strong> Anexe o comprovante de pagamento.';
+        labelOpc.style.color = '#e53935';
+      } else {
+        labelOpc.innerHTML = '<strong>Opcional:</strong> Anexe um documento se desejar.';
+        labelOpc.style.color = '#718096';
+      }
       // Exibe campo 'Outros'
       document.getElementById('pagamentoOutrosWrap').style.display = (val === 'outros') ? 'block' : 'none';
     }
@@ -695,6 +704,12 @@
       }
 
       // Imagens já estão no _imagensBase64Cache (array)
+
+      // Validação de Imagens Obrigatórias
+      if ((pagamento === 'pix' || pagamento === 'cartao') && _imagensBase64Cache.length === 0) {
+        mostrarToast(`Para pagamento via ${pagamento.toUpperCase()}, o anexo do comprovante é obrigatório.`, 'aviso');
+        return;
+      }
 
       const dados = {
         uid: user.uid,
